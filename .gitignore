@@ -1,0 +1,29 @@
+__pycache__/
+
+
+# Environments
+.env
+.venv/
+env/
+venv/
+
+
+# Databases
+*.db
+*.sqlite3
+
+
+# Docker
+*.log
+docker-compose.override.yml
+
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+
+
+# System files
+.DS_Store
+Thumbs.db
