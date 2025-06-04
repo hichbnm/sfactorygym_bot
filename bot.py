@@ -80,15 +80,10 @@ def main():
     app.add_handler(CommandHandler("remove_admin", admins.remove_admin_command))
     app.add_handler(CommandHandler("list_admins", admins.list_admins_command))
     app.add_handler(CommandHandler("broadcast", broadcast.broadcast))
-    app.add_handler(CommandHandler("myinfo", myinfo))
     app.add_handler(conv_change_name)
     app.add_handler(conv_change_duration)
     app.add_handler(CommandHandler("myinfo", myinfo))  # existing command
     app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^📋 Mes Infos$"), myinfo))  # button with text
-
-
-
-
 
 
     # Start polling updates from Telegram
