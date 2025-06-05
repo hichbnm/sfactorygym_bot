@@ -6,7 +6,7 @@ from telegram.ext import (
     filters,
 )
 from dotenv import load_dotenv
-import datetime
+from datetime import time
 import os
 
 from handlers.admin_edit import (
@@ -20,7 +20,7 @@ from handlers.admin_edit import (
     ASK_NEW_NAME,
     ASK_NEW_DURATION,
 )
-from handlers import start, remove, user, admins, broadcast, help 
+from handlers import start, remove, user, admins, broadcast, ai_assistant
 from database import add_admin, is_admin
 from handlers.user import myinfo , notify_expiring_users
 
@@ -30,13 +30,14 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
     job_queue = app.job_queue
-    job_queue.run_repeating(notify_expiring_users, interval=60, first=0)
+    job_queue.run_daily(notify_expiring_users,time= time(hour=9, minute=0),name="daily_expiry_notification")
 
     conv_change_name = ConversationHandler(
     entry_points=[CommandHandler("change_name", change_name_start)],
@@ -84,6 +85,11 @@ def main():
     app.add_handler(conv_change_duration)
     app.add_handler(CommandHandler("myinfo", myinfo))  # existing command
     app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^📋 Mes Infos$"), myinfo))  # button with text
+    app.add_handler(CommandHandler("assistant", ai_assistant.assistant))  # /assistant command
+    app.add_handler(CommandHandler("assistant_history", ai_assistant.history))  # /history command
+    app.add_handler(MessageHandler(filters.Text("🤖 Assistant AI"), ai_assistant.assistant))
+    app.add_handler(MessageHandler(filters.Text("🧠 Historique AI"), ai_assistant.history))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.handle_message))
 
 
     # Start polling updates from Telegram

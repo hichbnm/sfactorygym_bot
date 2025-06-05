@@ -1,10 +1,13 @@
 start - Commencer et enregistrer votre nom
 myinfo - Voir vos informations d’abonnement
-remove - Se désinscrire
-help - Afficher ce message 
+assistant - Parler avec l'assistant IA 🤖
+assistant_history - Voir l’historique de vos discussions IA 🧠 
 broadcast - Envoyer un message à tous les utilisateurs (admin uniquement)
 users - Voir la liste des utilisateurs (admin uniquement)
 change_name - Modifier le nom d’un utilisateur (admin uniquement) 
 change_duration - Modifier la durée d’abonnement d’un utilisateur (admin uniquement)  
 add_admin - Ajouter un admin par ID (admin uniquement)
 list_admins - Voir la liste des admins (admin uniquement)
+
+
+6002099959 - ID de l'admin initial

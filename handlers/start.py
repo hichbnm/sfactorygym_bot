@@ -19,15 +19,31 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if user is admin
     if chat_id == ADMIN_CHAT_ID:
         await update.message.reply_text(
-            "Bienvenue Admin ! Utilisez /add_admin pour ajouter un admin."
+            " Bienvenue Admin ! "
+        )
+        await update.message.reply_text(
+            "   Voici les commandes disponibles :\n"
+            "   /broadcast - Envoyer un message à tous les utilisateurs \n"
+            "   /users - Voir la liste des utilisateurs \n"
+            "   /change_name - Changer le nom d'un utilisateur\n"
+            "   /change_duration - Changer la durée d'abonnement d'un utilisateur\n"
+            "   /list_admins - Lister les admins\n"
+            "   /add_admin <chat_id> - Ajouter un admin\n" 
+            "   /remove_admin <chat_id> - Retirer un admin\n"           
         )
         return ConversationHandler.END
 
     # If user exists
     if user_exists(chat_id):
-        reply_keyboard = [["📋 Mes Infos"]]
+        reply_keyboard = [["📋 Mes Infos","🤖 Assistant AI","🧠 Historique AI" ]]
+
+        await update.message.reply_text("Vous êtes déjà inscrit.")
         await update.message.reply_text(
-            "Vous êtes déjà inscrit.",
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d’abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n" ,
+
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
         )
         return ConversationHandler.END
@@ -52,11 +68,19 @@ async def save_duration(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = context.user_data["name"]
     chat_id = update.message.chat_id
     add_user(chat_id, name, months)
+    reply_keyboard = [["📋 Mes Infos", "🤖 Assistant AI", "🧠 Historique AI"]]
+    markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
 
     await update.message.reply_text(
-    f"Merci {name}, votre abonnement de {months} mois est activé.",
-    reply_markup=ReplyKeyboardMarkup([["/myinfo"]], resize_keyboard=True)
-)
+           f"Merci {name}, votre abonnement de {months} mois est activé."
+    )
+    await update.message.reply_text(
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d’abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n",
+            reply_markup=markup
+    )
     return ConversationHandler.END
 
 async def change_name_start(update: Update, context: ContextTypes.DEFAULT_TYPE):

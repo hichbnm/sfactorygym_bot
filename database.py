@@ -19,7 +19,31 @@ CREATE TABLE IF NOT EXISTS admins (
     name TEXT
 )
 """)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS user_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    question TEXT,
+    answer TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
 conn.commit()
+
+def save_user_history(user_id, question, answer):
+    cursor.execute(
+        "INSERT INTO user_history (user_id, question, answer) VALUES (?, ?, ?)",
+        (user_id, question, answer)
+    )
+    conn.commit()
+
+def get_user_history(user_id, limit=5):
+    cursor.execute(
+        "SELECT question, answer FROM user_history WHERE user_id = ? ORDER BY timestamp DESC LIMIT ?",
+        (user_id, limit)
+    )
+    return cursor.fetchall()
 
 
 def get_user_info(chat_id):   
