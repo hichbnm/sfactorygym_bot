@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import add_user, user_exists , is_admin , get_all_admins
+from database import add_user, user_exists , is_admin , get_all_admins , is_approved
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 
@@ -35,7 +35,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     # If user exists
-    if user_exists(chat_id):
+    if  is_approved(chat_id):
         reply_keyboard = [["📋 Mes Infos","🤖 Assistant AI","🧠 Historique AI" ]]
 
         await update.message.reply_text("Vous êtes déjà inscrit.")
@@ -50,6 +50,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     # New user registration
+    if  user_exists(chat_id):   
+        await update.message.reply_text("Vous êtes déjà inscrit mais pas encore approuvé. Veuillez patienter.")
+        return ConversationHandler.END
+
     await update.message.reply_text("Bienvenue ! Quel est votre nom ?")
     return ASK_NAME 
 async def save_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
