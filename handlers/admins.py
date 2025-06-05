@@ -24,7 +24,7 @@ async def add_admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Cet ID n'existe pas dans la liste des utilisateurs.")
         return
 
-    add_admin(new_admin_id)
+    add_admin(new_admin_id, name)
     await update.message.reply_text(f"✅ Admin ajouté : 👤 {name} (🆔 {new_admin_id})")
 
 

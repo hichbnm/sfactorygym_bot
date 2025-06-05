@@ -4,24 +4,26 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database import save_user_history, get_user_history , is_approved
+from database import save_user_history, get_user_history , is_approved , is_admin , get_all_admins
 
 load_dotenv()
-
+ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 # Dictionary to track user history
 user_history = {}
 
 async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat_id
-    if not is_approved(chat_id):
+    if ( not is_approved(chat_id) ) and chat_id != ADMIN_CHAT_ID :
         await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
         return
 
     await update.message.reply_text("Welcome to S-factory Bot! Ask me anything 🤖")
 
-def ask_openrouter(user_id, user_input):
-    if not OPENROUTER_API_KEY:
+def ask_openrouter(user_id, user_input) :
+    chat_id = user_id  # Use user_id as chat_id for consistency in history tracking
+
+    if not OPENROUTER_API_KEY and is_approved(chat_id):
         return "API key is missing. Please check your environment setup."
 
     url = "https://openrouter.ai/api/v1/chat/completions"
@@ -33,7 +35,7 @@ def ask_openrouter(user_id, user_input):
     # Build user-specific chat history
     messages = []
 
-    if user_id in user_history:
+    if user_id in user_history and is_approved(chat_id):
         for item in user_history[user_id]:
             messages.append({"role": "user", "content": item["question"]})
             messages.append({"role": "assistant", "content": item["answer"]})
@@ -60,7 +62,13 @@ def ask_openrouter(user_id, user_input):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
+    chat_id = update.message.chat_id
     user_input = update.message.text
+
+    # Access control
+    if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
+        await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
+        return
 
     # Show typing action
     await update.message.chat.send_action(action=ChatAction.TYPING)
@@ -71,9 +79,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Reply to the user
     await update.message.reply_text(reply)
 
+    # Save history to database and memory
     save_user_history(user_id, user_input, reply)
 
-    # Save user input and bot reply to history
     if user_id not in user_history:
         user_history[user_id] = []
     user_history[user_id].append({
@@ -81,11 +89,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "answer": reply
     })
 
+
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     history_items = get_user_history(user_id)
     chat_id = update.message.chat_id
-    if not is_approved(chat_id):
+    if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
         await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
         return
 

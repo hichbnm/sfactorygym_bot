@@ -11,7 +11,7 @@ ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 async def myinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_info = get_user_info(chat_id)
-    if not is_approved(chat_id):
+    if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
         await update.message.reply_text("⛔ Vous n'êtes pas approuvé pour utiliser cette commande.")
         return
 

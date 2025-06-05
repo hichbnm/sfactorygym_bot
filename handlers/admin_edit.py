@@ -113,6 +113,8 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         reply_keyboard = [["📋 Mes Infos", "🤖 Assistant AI", "🧠 Historique AI"]]
         markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
+        with open("media/sfactory.jpg", "rb") as photo:
+            await context.bot.send_photo(chat_id=chat_id, photo=photo)
 
         await context.bot.send_message(chat_id, "✅ Votre abonnement a été validé. Bienvenue !")
         await context.bot.send_message(
