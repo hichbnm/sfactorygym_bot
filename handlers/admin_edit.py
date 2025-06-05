@@ -3,7 +3,10 @@ from telegram.ext import ContextTypes, ConversationHandler
 from database import update_user_name, update_user_subscription, user_exists, get_user_name
 from datetime import datetime
 from telegram import ReplyKeyboardMarkup
+import sqlite3
 
+conn = sqlite3.connect("bot.db", check_same_thread=False)
+cursor = conn.cursor()
 ASK_USER_CHAT_ID, ASK_NEW_NAME, ASK_NEW_DURATION = range(3)
 
 # Check admin decorator helper
@@ -96,3 +99,33 @@ async def change_duration_save(update: Update, context: ContextTypes.DEFAULT_TYP
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
+
+async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    chat_id = int(data.split("_")[1])
+    action = data.split("_")[0]
+
+    if action == "approve":
+        cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
+        conn.commit()
+
+        reply_keyboard = [["📋 Mes Infos", "🤖 Assistant AI", "🧠 Historique AI"]]
+        markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
+
+        await context.bot.send_message(chat_id, "✅ Votre abonnement a été validé. Bienvenue !")
+        await context.bot.send_message(
+            chat_id,
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d’abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n",
+            reply_markup=markup
+        )
+        await query.edit_message_text("✅ Utilisateur approuvé.")
+    else:
+        cursor.execute("DELETE FROM users WHERE chat_id = ?", (chat_id,))
+        conn.commit()
+        await context.bot.send_message(chat_id, "❌ Votre demande d'abonnement a été refusée.")
+        await query.edit_message_text("❌ Demande refusée.")

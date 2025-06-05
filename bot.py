@@ -5,6 +5,8 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from telegram.ext import CallbackQueryHandler  # ✅ Correct
+from handlers.admin_edit import handle_approval
 from dotenv import load_dotenv
 from datetime import time
 import os
@@ -90,6 +92,8 @@ def main():
     app.add_handler(MessageHandler(filters.Text("🤖 Assistant AI"), ai_assistant.assistant))
     app.add_handler(MessageHandler(filters.Text("🧠 Historique AI"), ai_assistant.history))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.handle_message))
+    app.add_handler(CallbackQueryHandler(handle_approval, pattern="^(approve|decline)_"))
+
 
 
     # Start polling updates from Telegram

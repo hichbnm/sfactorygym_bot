@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     chat_id INTEGER PRIMARY KEY,
     name TEXT,
     subscription_start DATE,
-    subscription_end DATE 
+    subscription_end DATE ,
+    status TEXT DEFAULT 'pending'
 )
 """)
 cursor.execute("""
@@ -60,7 +61,7 @@ def get_user_info(chat_id):
 def add_user(chat_id, name, months=1):
     subscription_start = datetime.now().date()
     subscription_end = (datetime.now() + timedelta(days=30 * months)).date()
-    cursor.execute("INSERT OR REPLACE INTO users (chat_id, name ,subscription_start,subscription_end) VALUES (?, ?, ? , ?)", (chat_id, name, subscription_start, subscription_end))
+    cursor.execute("INSERT OR REPLACE INTO users (chat_id, name ,subscription_start,subscription_end, status) VALUES (?, ?, ? , ?, 'pending')", (chat_id, name, subscription_start, subscription_end))
     conn.commit()
 
 def user_exists(chat_id):
@@ -126,3 +127,9 @@ def update_user_subscription(chat_id, months):
     new_end_date = (datetime.now() + timedelta(days=30 * months)).date()
     cursor.execute("UPDATE users SET subscription_end = ? WHERE chat_id = ?", (new_end_date, chat_id))
     conn.commit()
+
+
+def is_approved(chat_id):
+    cursor.execute("SELECT status FROM users WHERE chat_id = ?", (chat_id,))
+    result = cursor.fetchone()
+    return result and result[0] == 'approved'

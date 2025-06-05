@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram import Bot
 from telegram.ext import ContextTypes
-from database import get_all_users, is_admin, get_remaining_days , get_user_info
+from database import get_all_users, is_admin, get_remaining_days , get_user_info , is_approved
 import os
 
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
@@ -11,6 +11,9 @@ ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 async def myinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_info = get_user_info(chat_id)
+    if not is_approved(chat_id):
+        await update.message.reply_text("⛔ Vous n'êtes pas approuvé pour utiliser cette commande.")
+        return
 
     if not user_info:
         await update.message.reply_text("❌ Vous n'êtes pas encore inscrit.")

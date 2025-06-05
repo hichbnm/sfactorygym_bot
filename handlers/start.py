@@ -1,6 +1,7 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import add_user, user_exists , is_admin
+from database import add_user, user_exists , is_admin , get_all_admins
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 
 import os
@@ -67,21 +68,31 @@ async def save_duration(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     name = context.user_data["name"]
     chat_id = update.message.chat_id
-    add_user(chat_id, name, months)
-    reply_keyboard = [["📋 Mes Infos", "🤖 Assistant AI", "🧠 Historique AI"]]
-    markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
 
-    await update.message.reply_text(
-           f"Merci {name}, votre abonnement de {months} mois est activé."
-    )
-    await update.message.reply_text(
-            "   Voici les commandes disponibles :\n"
-            "   /myinfo - Voir vos informations d’abonnement \n"
-            "   /assistant - Parler avec l'assistant IA 🤖 \n"
-            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n",
-            reply_markup=markup
-    )
+    # Save with "pending" status
+    add_user(chat_id, name, months)
+
+    await update.message.reply_text("📨 Votre demande a été envoyée à l'admin pour validation. Veuillez patienter.")
+
+    # Notify all admins
+    for admin_id, _ in get_all_admins():
+        buttons = [
+            [
+                InlineKeyboardButton("✅ Accepter", callback_data=f"approve_{chat_id}"),
+                InlineKeyboardButton("❌ Refuser", callback_data=f"decline_{chat_id}")
+            ]
+        ]
+        await context.bot.send_message(
+            admin_id,
+            f"👤 Nouvelle demande d'abonnement:\n"
+            f"🆔 ID: {chat_id}\n"
+            f"👤 Nom: {name}\n"
+            f"⏳ Durée: {months} mois",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
     return ConversationHandler.END
+
 
 async def change_name_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id

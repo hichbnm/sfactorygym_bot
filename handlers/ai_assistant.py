@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database import save_user_history, get_user_history
+from database import save_user_history, get_user_history , is_approved
 
 load_dotenv()
 
@@ -13,6 +13,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 user_history = {}
 
 async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.message.chat_id
+    if not is_approved(chat_id):
+        await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
+        return
+
     await update.message.reply_text("Welcome to S-factory Bot! Ask me anything 🤖")
 
 def ask_openrouter(user_id, user_input):
@@ -79,6 +84,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     history_items = get_user_history(user_id)
+    chat_id = update.message.chat_id
+    if not is_approved(chat_id):
+        await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
+        return
 
     if not history_items:
         await update.message.reply_text("Vous n'avez pas encore d'historique 🧠")
