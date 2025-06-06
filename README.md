@@ -6,17 +6,24 @@ A Telegram bot to manage gym (salle de sport) memberships. It allows users to re
 
 ## 📦 Features
 
-* 🤖 User Registration via `/start`
-* ⏳ Select subscription duration: 1 month, 3 months, 12 months
-* 📋 View subscription info via `/myinfo`
-* 🛠 Admin-only features:
+### 👤 User Features
 
-  * `/add_admin` — Add new admin
-  * `/change_name` — Change a user's name
-  * `/change_duration` — Modify a user's subscription period
-  * `/broadcast` — Send message to all users
-  * `/users` — List all registered users
-  * `/admins` — List all admins
+- `/start` — Begin registration
+- ⏳ Choose subscription duration: 1, 3, or 12 months
+- 🔐 Wait for **admin approval** to access features
+- 📋 `/myinfo` — View your subscription details
+- 🤖 `/assistant` — Talk with the AI assistant
+- 🧠 `/assistant_history` — View your AI chat history
+
+### 🔧 Admin Features
+
+- `/add_admin <chat_id>` — Add a new admin
+- `/change_name <chat_id> <new_name>` — Change a user's name
+- `/change_duration <chat_id> <months>` — Modify a user's subscription
+- `/broadcast <message>` — Send a message to all users
+- `/users` — List all users
+- `/admins` — List all admins
+- ✅ Inline approval or rejection of subscription requests
 
 ---
 
@@ -49,8 +56,8 @@ DB_NAME=your_db_name
 To run the bot with Docker:
 
 ```bash
-docker-compose build
-docker-compose up
+
+docker-compose up --build
 ```
 
 ---
@@ -73,11 +80,18 @@ python bot/main.py
 
 ## 👥 User Flow
 
-1. User sends `/start`
-2. Bot asks for name and subscription duration
-3. Saves data and confirms registration
-4. Users can check their info with 📋 **Mes Infos**
-5. Admin sees a different interface without the user button
+1. User starts bot via `/start`
+2. Bot asks for user's name
+3. User selects subscription period (1/3/12 months)
+4. Request is sent to admin
+5. Admin accepts or declines using inline buttons
+6. If accepted:
+     - User can access /myinfo, /assistant, and /assistant_history
+     - User is notified and has no access to features
+
+
+
+
 
 ---
 
