@@ -80,7 +80,7 @@ async def notify_expiring_users(context):
 
     for chat_id, name in users:
         days_left = get_remaining_days(chat_id)
-        if days_left == 0:
+        if days_left == 3:
             try:
                 await bot.send_message(
                     chat_id=chat_id,

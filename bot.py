@@ -45,7 +45,11 @@ def main():
     scheduler.start()
 
     job_queue = app.job_queue
-    job_queue.run_repeating(notify_expiring_users, interval=60, name="expiry_notification_every_minute")
+    job_queue.run_daily(
+    notify_expiring_users,
+    time=time(hour=9, minute=0),
+    name="expiry_notification_daily"
+    )
 
     conv_change_name = ConversationHandler(
     entry_points=[CommandHandler("change_name", change_name_start)],
