@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram import Bot
 from telegram.ext import ContextTypes
-from database import get_all_users, is_admin, get_remaining_days , get_user_info , is_approved
+from database import get_all_users, is_admin, get_remaining_days , get_user_info , is_approved , disable_expired_users , get_expired_users , is_expired
 import os
 
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
@@ -9,8 +9,14 @@ ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 # Get user info command
 
 async def myinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    
+
     chat_id = update.effective_chat.id
     user_info = get_user_info(chat_id)
+    if  is_expired(chat_id):
+        await update.message.reply_text("⚠️ Votre abonnement est expiré. Veuillez le renouveler pour continuer à utiliser le service.")
+        return
+
     if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
         await update.message.reply_text("⛔ Vous n'êtes pas approuvé pour utiliser cette commande.")
         return
@@ -23,18 +29,14 @@ async def myinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     days_left = (end_date - start_date).days if end_date >= start_date else 0
 
     if days_left > 0:
-        status = f"✅ Actif — ⏳ {days_left} jours restants"
-    else:
-        status = "⚠️ Expiré"
-
-    msg = (
-        f"👤 *Nom* : {name}\n"
-        f"🗓️ *Début* : {start_date.strftime('%d-%m-%Y')}\n"
-        f"📅 *Fin* : {end_date.strftime('%d-%m-%Y')}\n"
-        f"{status}"
-    )
-
-    await update.message.reply_text(msg, parse_mode="Markdown")
+        status = f" ⏳ {days_left} jours restants"
+        msg = (
+            f"👤 *Nom* : {name}\n"
+            f"🗓️ *Début* : {start_date.strftime('%d-%m-%Y')}\n"
+            f"📅 *Fin* : {end_date.strftime('%d-%m-%Y')}\n"
+            f"📊 *Statut* : ✅ Actif {status}\n"
+        )
+        await update.message.reply_text(msg, parse_mode="Markdown")
 
 # List all users for admin
 
@@ -78,11 +80,19 @@ async def notify_expiring_users(context):
 
     for chat_id, name in users:
         days_left = get_remaining_days(chat_id)
-        if days_left == 3:
+        if days_left == 0:
             try:
                 await bot.send_message(
                     chat_id=chat_id,
                     text=f"👋 Bonjour {name}, votre abonnement expire dans 3 jours. Pensez à le renouveler pour continuer à profiter de la salle de sport 🏋️‍♂️."
+                )
+            except Exception as e:
+                print(f"Erreur lors de l'envoi à {chat_id}: {e}")
+        elif days_left == 0:
+            try:
+                await bot.send_message(
+                    chat_id=chat_id,
+                    text=f"⚠️ Bonjour {name}, votre abonnement a expiré aujourd'hui. Veuillez le renouveler pour continuer à profiter de la salle de sport."
                 )
             except Exception as e:
                 print(f"Erreur lors de l'envoi à {chat_id}: {e}")

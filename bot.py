@@ -25,6 +25,9 @@ from handlers.admin_edit import (
 from handlers import start, remove, user, admins, broadcast, ai_assistant
 from database import add_admin, is_admin
 from handlers.user import myinfo , notify_expiring_users
+from handlers.start import disable_expired_users
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 
 # Load environment variables from .env file
@@ -37,9 +40,12 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(disable_expired_users, 'interval', days=1)
+    scheduler.start()
 
     job_queue = app.job_queue
-    job_queue.run_daily(notify_expiring_users,time= time(hour=9, minute=0),name="daily_expiry_notification")
+    job_queue.run_repeating(notify_expiring_users, interval=60, name="expiry_notification_every_minute")
 
     conv_change_name = ConversationHandler(
     entry_points=[CommandHandler("change_name", change_name_start)],

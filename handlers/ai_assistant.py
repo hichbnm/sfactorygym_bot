@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database import save_user_history, get_user_history , is_approved , is_admin , get_all_admins
+from database import save_user_history, get_user_history , is_approved , is_admin , get_all_admins , disable_expired_users
 
 load_dotenv()
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
@@ -13,6 +13,8 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 user_history = {}
 
 async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    disable_expired_users()
+
     chat_id = update.message.chat_id
     if ( not is_approved(chat_id) ) and chat_id != ADMIN_CHAT_ID :
         await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
@@ -91,6 +93,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    disable_expired_users()
     user_id = update.message.from_user.id
     history_items = get_user_history(user_id)
     chat_id = update.message.chat_id

@@ -133,3 +133,20 @@ def is_approved(chat_id):
     cursor.execute("SELECT status FROM users WHERE chat_id = ?", (chat_id,))
     result = cursor.fetchone()
     return result and result[0] == 'approved'
+def is_expired(chat_id):
+    cursor.execute("SELECT status FROM users WHERE chat_id = ?", (chat_id,))
+    result = cursor.fetchone()
+    return result and result[0] == 'expired'
+
+def disable_expired_users():
+    today = datetime.today().date()
+    cursor.execute("""
+        UPDATE users
+        SET status = 'expired'
+        WHERE status = 'approved'
+        AND subscription_end <= ?
+    """, (today,))
+    conn.commit()
+def get_expired_users():
+    cursor.execute("SELECT chat_id, name FROM users WHERE status = 'expired'")
+    return cursor.fetchall()

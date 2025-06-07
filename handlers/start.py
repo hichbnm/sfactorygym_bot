@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import add_user, user_exists , is_admin , get_all_admins , is_approved
+from database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 
@@ -36,6 +36,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # If user exists
     if  is_approved(chat_id):
+        disable_expired_users()
         reply_keyboard = [["📋 Mes Infos","🤖 Assistant AI","🧠 Historique AI" ]]
 
         await update.message.reply_text("Vous êtes déjà inscrit.")
