@@ -2,6 +2,7 @@ start - Commencer et enregistrer votre nom
 myinfo - Voir vos informations d’abonnement
 assistant - Parler avec l'assistant IA 🤖
 assistant_history - Voir l’historique de vos discussions IA 🧠 
+renew - Renouveler votre abonnement
 broadcast - Envoyer un message à tous les utilisateurs (admin uniquement)
 users - Voir la liste des utilisateurs (admin uniquement)
 change_name - Modifier le nom d’un utilisateur (admin uniquement) 

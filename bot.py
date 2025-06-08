@@ -46,10 +46,10 @@ def main():
     scheduler.start()
 
     job_queue = app.job_queue
-    job_queue.run_repeating(
+    job_queue.run_daily(
     notify_expiring_users,
-    interval=30,  # every 30 seconds
-    name="expiry_notification_every_30s"
+    time=time(hour=9, minute=0),  # runs every day at 09:00
+    name="expiry_notification_daily"
     )
 
 
