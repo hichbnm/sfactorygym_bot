@@ -22,10 +22,6 @@ async def myinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ Votre abonnement est expiré. Envoyez /renew pour demander un renouvellement")
         return
 
-    if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
-        await update.message.reply_text("⛔ Vous n'êtes pas approuvé pour utiliser cette commande.")
-        return
-
     if not user_info:
         await update.message.reply_text("❌ Vous n'êtes pas encore inscrit.")
         return

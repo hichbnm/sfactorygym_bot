@@ -23,11 +23,13 @@ from handlers.admin_edit import (
     ASK_NEW_DURATION,
 )
 from handlers import start, remove, user, admins, broadcast, ai_assistant
-from database.database import add_admin, is_admin 
+from database.database import add_admin, is_admin , get_all_admins
+
 from handlers.user import myinfo , notify_expiring_users , renew, renew_duration
 from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler
 from handlers.admin_edit import handle_renewal_approval
+from telegram import BotCommand
 
 
 
@@ -38,9 +40,31 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
+USER_COMMANDS = [
+    BotCommand("start", "Commencer et enregistrer votre nom"),
+    BotCommand("myinfo", "Voir vos informations d’abonnement"),
+    BotCommand("assistant", "Parler avec l'assistant IA 🤖"),
+    BotCommand("assistant_history", "Voir l’historique de vos discussions IA 🧠"),
+    BotCommand("renew", "Renouveler votre abonnement"),
+]
 
+ADMIN_COMMANDS = USER_COMMANDS + [
+    BotCommand("broadcast", "Envoyer un message à tous les utilisateurs"),
+    BotCommand("users", "Voir la liste des utilisateurs"),
+    BotCommand("change_name", "Modifier le nom d’un utilisateur"),
+    BotCommand("change_duration", "Modifier la durée d’abonnement d’un utilisateur"),
+    BotCommand("add_admin", "Ajouter un admin par ID"),
+    BotCommand("remove_admin", "Retirer un admin par ID"),
+    BotCommand("list_admins", "Voir la liste des admins"),
+]
+
+async def set_commands(app):
+    await app.bot.set_my_commands(USER_COMMANDS)
+    for admin_id, _ in get_all_admins():
+        await app.bot.set_my_commands(ADMIN_COMMANDS, scope={"type": "chat", "chat_id": admin_id})
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
+    app.post_init = set_commands
     scheduler = BackgroundScheduler()
     scheduler.add_job(disable_expired_users, 'interval', days=1)
     scheduler.start()
@@ -51,6 +75,7 @@ def main():
     time=time(hour=9, minute=0),  # runs every day at 09:00
     name="expiry_notification_daily"
     )
+    
 
 
     conv_change_name = ConversationHandler(

@@ -18,7 +18,7 @@ async def is_admin_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Change user name command
 async def change_name_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin_check(update, context):
-        await update.message.reply_text("❌ Vous n'êtes pas autorisé à utiliser cette commande.")
+        await update.message.reply_text("⛔ Vous n'êtes pas admin.")
         return ConversationHandler.END
 
     await update.message.reply_text("Entrez l'ID du chat Telegram de l'utilisateur dont vous voulez changer le nom :")
@@ -50,7 +50,7 @@ async def change_name_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Change subscription duration command
 async def change_duration_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin_check(update, context):
-        await update.message.reply_text("❌ Vous n'êtes pas autorisé à utiliser cette commande.")
+        await update.message.reply_text("⛔ Vous n'êtes pas admin.")
         return ConversationHandler.END
 
     await update.message.reply_text("Entrez l'ID du chat Telegram de l'utilisateur dont vous voulez changer la durée de l'abonnement :")
