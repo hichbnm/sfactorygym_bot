@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database import save_user_history, get_user_history , is_approved , is_expired , is_pending , disable_expired_users
+from database.database import save_user_history, get_user_history , is_approved , is_expired , is_pending , disable_expired_users
 load_dotenv()
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")

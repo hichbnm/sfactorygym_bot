@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users, is_pending
+from database.database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users, is_pending
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 
@@ -146,7 +146,7 @@ async def change_duration_save(update: Update, context: ContextTypes.DEFAULT_TYP
     chat_id = context.user_data["target_chat_id"]
     
     # fetch current name
-    from database import get_user_name
+    from database.database import get_user_name
     name = get_user_name(chat_id)
     if not name:
         await update.message.reply_text("Utilisateur non trouvé.")

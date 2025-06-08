@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from database import add_admin, remove_admin, is_admin, get_all_admins, get_user_name
+from database.database import add_admin, remove_admin, is_admin, get_all_admins, get_user_name
 
 async def add_admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id

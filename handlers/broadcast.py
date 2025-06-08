@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from database import get_all_users, is_admin , get_all_approved_users
+from database.database import get_all_users, is_admin , get_all_approved_users
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id

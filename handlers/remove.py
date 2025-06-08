@@ -1,4 +1,4 @@
-from database import remove_user
+from database.database import remove_user
 from telegram import Update
 from telegram.ext import ContextTypes
 

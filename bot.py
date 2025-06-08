@@ -23,7 +23,7 @@ from handlers.admin_edit import (
     ASK_NEW_DURATION,
 )
 from handlers import start, remove, user, admins, broadcast, ai_assistant
-from database import add_admin, is_admin 
+from database.database import add_admin, is_admin 
 from handlers.user import myinfo , notify_expiring_users , renew, renew_duration
 from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler

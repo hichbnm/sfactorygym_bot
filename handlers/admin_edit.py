@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import update_user_name, update_user_subscription, user_exists, get_user_name
+from database.database import update_user_name, update_user_subscription, user_exists, get_user_name
 from datetime import datetime
 from telegram import ReplyKeyboardMarkup
 import sqlite3
@@ -12,7 +12,7 @@ ASK_USER_CHAT_ID, ASK_NEW_NAME, ASK_NEW_DURATION = range(3)
 # Check admin decorator helper
 async def is_admin_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    from database import is_admin
+    from database.database import is_admin
     return is_admin(chat_id)
 
 # Change user name command
@@ -137,7 +137,7 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("❌ Demande refusée.")
 
 from telegram.ext import CallbackQueryHandler
-from database import update_user_subscription
+from database.database import update_user_subscription
 
 async def handle_renewal_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
