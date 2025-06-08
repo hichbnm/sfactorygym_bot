@@ -14,6 +14,8 @@ A Telegram bot to manage gym (salle de sport) memberships. It allows users to re
 - 📋 `/myinfo` — View your subscription details
 - 🤖 `/assistant` — Talk with the AI assistant
 - 🧠 `/assistant_history` — View your AI chat history
+-    `/renew` — Renew your subscription
+
 
 ### 🔧 Admin Features
 
@@ -57,7 +59,7 @@ To run the bot with Docker:
 
 ```bash
 
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 ---
@@ -120,7 +122,7 @@ python bot/main.py
 | `/change_duration` | Modify a user's subscription duration |
 | `/broadcast`       | Send a message to all users           |
 | `/users`           | List all users                        |
-| `/admins`          | List all admins                       |
+| `/list_admins`     | List all admins                       |
 
 ---
 
