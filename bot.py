@@ -23,10 +23,11 @@ from handlers.admin_edit import (
     ASK_NEW_DURATION,
 )
 from handlers import start, remove, user, admins, broadcast, ai_assistant
-from database import add_admin, is_admin
-from handlers.user import myinfo , notify_expiring_users
+from database import add_admin, is_admin 
+from handlers.user import myinfo , notify_expiring_users , renew, renew_duration
 from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler
+from handlers.admin_edit import handle_renewal_approval
 
 
 
@@ -45,11 +46,12 @@ def main():
     scheduler.start()
 
     job_queue = app.job_queue
-    job_queue.run_daily(
+    job_queue.run_repeating(
     notify_expiring_users,
-    time=time(hour=9, minute=0),
-    name="expiry_notification_daily"
+    interval=30,  # every 30 seconds
+    name="expiry_notification_every_30s"
     )
+
 
     conv_change_name = ConversationHandler(
     entry_points=[CommandHandler("change_name", change_name_start)],
@@ -85,6 +87,17 @@ def main():
         fallbacks=[],
     )
     app.add_handler(conv_handler)
+    conv_renew = ConversationHandler(
+    entry_points=[
+        CommandHandler("renew", renew),
+        MessageHandler(filters.Text("🔄 Renouveler"), renew),  # Add this line here!
+    ],
+    states={
+        "RENEW_DURATION": [MessageHandler(filters.TEXT & ~filters.COMMAND, renew_duration)],
+    },
+    fallbacks=[],
+)
+    app.add_handler(conv_renew)
 
     # Add other command handlers
     app.add_handler(CommandHandler("remove", remove.remove))
@@ -99,10 +112,13 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^📋 Mes Infos$"), myinfo))  # button with text
     app.add_handler(CommandHandler("assistant", ai_assistant.assistant))  # /assistant command
     app.add_handler(CommandHandler("assistant_history", ai_assistant.history))  # /history command
+    app.add_handler(CommandHandler("history", ai_assistant.history))  # /history command
+
     app.add_handler(MessageHandler(filters.Text("🤖 Assistant AI"), ai_assistant.assistant))
     app.add_handler(MessageHandler(filters.Text("🧠 Historique AI"), ai_assistant.history))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.handle_message))
     app.add_handler(CallbackQueryHandler(handle_approval, pattern="^(approve|decline)_"))
+    app.add_handler(CallbackQueryHandler(handle_renewal_approval, pattern="^renew_(approve|decline)_"))
 
 
 

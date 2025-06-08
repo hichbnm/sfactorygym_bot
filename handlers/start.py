@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, ConversationHandler
-from database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users
+from database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users, is_pending
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
 
@@ -33,25 +33,31 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "   /remove_admin <chat_id> - Retirer un admin\n"           
         )
         return ConversationHandler.END
-
+    
+    disable_expired_users()
     # If user exists
     if  is_approved(chat_id):
         disable_expired_users()
-        reply_keyboard = [["📋 Mes Infos","🤖 Assistant AI","🧠 Historique AI" ]]
+        reply_keyboard = [
+            ["📋 Mes Infos", "🤖 Assistant AI"],
+            ["🧠 Historique AI", "🔄 Renouveler"]
+       ]
+
 
         await update.message.reply_text("Vous êtes déjà inscrit.")
         await update.message.reply_text(
             "   Voici les commandes disponibles :\n"
             "   /myinfo - Voir vos informations d’abonnement \n"
             "   /assistant - Parler avec l'assistant IA 🤖 \n"
-            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n" ,
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n"
+            "   /renew - Renouveler votre abonnement 🔄\n" ,
 
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
         )
         return ConversationHandler.END
 
     # New user registration
-    if  user_exists(chat_id):   
+    if  is_pending(chat_id):
         await update.message.reply_text("Vous êtes déjà inscrit mais pas encore approuvé. Veuillez patienter.")
         return ConversationHandler.END
 

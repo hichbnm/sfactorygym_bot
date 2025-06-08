@@ -137,6 +137,10 @@ def is_expired(chat_id):
     cursor.execute("SELECT status FROM users WHERE chat_id = ?", (chat_id,))
     result = cursor.fetchone()
     return result and result[0] == 'expired'
+def is_pending(chat_id):
+    cursor.execute("SELECT status FROM users WHERE chat_id = ?", (chat_id,))
+    result = cursor.fetchone()
+    return result and result[0] == 'pending'
 
 def disable_expired_users():
     today = datetime.today().date()
@@ -150,3 +154,16 @@ def disable_expired_users():
 def get_expired_users():
     cursor.execute("SELECT chat_id, name FROM users WHERE status = 'expired'")
     return cursor.fetchall()
+
+def renew_subscription(chat_id, months=1):
+    subscription_start = datetime.now().date()
+    subscription_end = (datetime.now() + timedelta(days=30 * months)).date()
+    cursor.execute(
+        "UPDATE users SET subscription_start = ?, subscription_end = ?, status = 'pending' WHERE chat_id = ?",
+        (subscription_start, subscription_end, chat_id)
+    )
+    conn.commit()
+
+def get_all_approved_users():
+         cursor.execute("SELECT chat_id, name FROM users WHERE status = 'approved'")
+         return cursor.fetchall()

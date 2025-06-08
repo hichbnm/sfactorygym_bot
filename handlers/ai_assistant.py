@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database import save_user_history, get_user_history , is_approved , is_admin , get_all_admins , disable_expired_users
-
+from database import save_user_history, get_user_history , is_approved , is_expired , is_pending , disable_expired_users
 load_dotenv()
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -14,10 +13,12 @@ user_history = {}
 
 async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     disable_expired_users()
-
     chat_id = update.message.chat_id
+    if  is_expired(chat_id):
+        await update.message.reply_text("⚠️ Votre abonnement est expiré. Envoyez /renew pour demander un renouvellement.")
+        return
     if ( not is_approved(chat_id) ) and chat_id != ADMIN_CHAT_ID :
-        await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
+        await update.message.reply_text("⏳ Merci de patienter pendant que l'admin valide votre inscription.")
         return
 
     await update.message.reply_text("Welcome to S-factory Bot! Ask me anything 🤖")
@@ -36,7 +37,6 @@ def ask_openrouter(user_id, user_input) :
 
     # Build user-specific chat history
     messages = []
-
     if user_id in user_history and is_approved(chat_id):
         for item in user_history[user_id]:
             messages.append({"role": "user", "content": item["question"]})
@@ -60,6 +60,10 @@ def ask_openrouter(user_id, user_input) :
         return f"❌ HTTP Error: {e}"
     except Exception as e:
         return f"❌ Unexpected Error: {str(e)}"
+async def send_long_message(bot, chat_id, text):
+    for i in range(0, len(text), 4096):
+        await bot.send_message(chat_id, text[i:i+4096])
+
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -97,6 +101,12 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     history_items = get_user_history(user_id)
     chat_id = update.message.chat_id
+    if is_pending(chat_id):
+        await update.message.reply_text("⏳ Merci de patienter pendant que l'admin valide votre inscription.")
+        return
+    if  is_expired(chat_id):
+        await update.message.reply_text("⚠️ Votre abonnement est expiré. Envoyez /renew pour demander un renouvellement.")
+        return
     if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
         await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
         return
@@ -109,7 +119,6 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for question, answer in reversed(history_items):
         history_text += f"Q: {question}\nA: {answer}\n\n"
 
-    await update.message.reply_text(history_text)
-
+    await send_long_message(context.bot, update.message.chat_id, history_text)
 
 

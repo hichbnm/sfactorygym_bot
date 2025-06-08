@@ -111,7 +111,10 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
         conn.commit()
 
-        reply_keyboard = [["📋 Mes Infos", "🤖 Assistant AI", "🧠 Historique AI"]]
+        reply_keyboard = [
+            ["📋 Mes Infos", "🤖 Assistant AI"],
+            ["🧠 Historique AI", "🔄 Renouveler"]
+       ]
         markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
         with open("media/sfactory.jpg", "rb") as photo:
             await context.bot.send_photo(chat_id=chat_id, photo=photo)
@@ -122,7 +125,8 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "   Voici les commandes disponibles :\n"
             "   /myinfo - Voir vos informations d’abonnement \n"
             "   /assistant - Parler avec l'assistant IA 🤖 \n"
-            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n",
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n"
+            "   /renew - Renouveler votre abonnement 🔄\n",
             reply_markup=markup
         )
         await query.edit_message_text("✅ Utilisateur approuvé.")
@@ -131,3 +135,44 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
         conn.commit()
         await context.bot.send_message(chat_id, "❌ Votre demande d'abonnement a été refusée.")
         await query.edit_message_text("❌ Demande refusée.")
+
+from telegram.ext import CallbackQueryHandler
+from database import update_user_subscription
+
+async def handle_renewal_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    parts = data.split("_")
+    action = parts[1]
+    chat_id = int(parts[2])
+
+    if action == "approve":
+        reply_keyboard = [
+            ["📋 Mes Infos", "🤖 Assistant AI"],
+            ["🧠 Historique AI", "🔄 Renouveler"]
+       ]
+        markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
+        with open("media/sfactory.jpg", "rb") as photo:
+         await context.bot.send_photo(chat_id=chat_id, photo=photo)
+
+        # Approve: set status to 'approved'
+        cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
+        conn.commit()
+        await context.bot.send_message(chat_id, "✅ Votre renouvellement d'abonnement a été validé. Bienvenue à nouveau !")
+        await context.bot.send_message(
+            chat_id,
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d’abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n"
+            "   /renew - Renouveler votre abonnement 🔄\n",
+            reply_markup=markup
+        )
+        await query.edit_message_text("✅ Renouvellement approuvé.")
+    elif action == "decline":
+        # Decline: set status to 'expired'
+        cursor.execute("UPDATE users SET status = 'expired' WHERE chat_id = ?", (chat_id,))
+        conn.commit()
+        await context.bot.send_message(chat_id, "❌ Votre demande de renouvellement a été refusée.")
+        await query.edit_message_text("❌ Renouvellement refusé.")

@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from database import get_all_users, is_admin
+from database import get_all_users, is_admin , get_all_approved_users
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
@@ -13,7 +13,7 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     message = " ".join(context.args)
-    users = get_all_users()
+    users = get_all_approved_users()
 
     sent_count = 0
     for chat_id, name in users:
