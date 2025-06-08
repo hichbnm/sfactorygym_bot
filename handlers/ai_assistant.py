@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes
-from database.database import save_user_history, get_user_history , is_approved , is_expired , is_pending , disable_expired_users , get_user_info
+from database.database import save_user_history, get_user_history , is_approved , is_expired , is_pending , disable_expired_users , is_admin
 load_dotenv()
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -14,18 +14,16 @@ user_history = {}
 async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     disable_expired_users()
     chat_id = update.message.chat_id
-    user_info = get_user_info(chat_id)
     if  is_expired(chat_id):
         await update.message.reply_text("⚠️ Votre abonnement est expiré. Envoyez /renew pour demander un renouvellement.")
         return
-    if is_pending(chat_id) and chat_id != ADMIN_CHAT_ID :
+    if ( not is_approved(chat_id) ) and chat_id != ADMIN_CHAT_ID :
         await update.message.reply_text("⏳ Merci de patienter pendant que l'admin valide votre inscription.")
         return
-    if not user_info:
-        await update.message.reply_text("❌ Vous n'êtes pas encore inscrit.")
-        return
-
-    await update.message.reply_text("Welcome to S-factory Bot! Ask me anything 🤖")
+    context.user_data["assistant_mode"] = True
+    if is_admin(chat_id):
+        await update.message.reply_text("⛔️ Cette fonctionnalité est réservée aux utilisateurs.") 
+    else: await update.message.reply_text("Welcome to S-factory Bot! Ask me anything 🤖")
 
 def ask_openrouter(user_id, user_input) :
     chat_id = user_id  # Use user_id as chat_id for consistency in history tracking
@@ -105,16 +103,14 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     history_items = get_user_history(user_id)
     chat_id = update.message.chat_id
-    user_info = get_user_info(chat_id)
     if is_pending(chat_id):
         await update.message.reply_text("⏳ Merci de patienter pendant que l'admin valide votre inscription.")
         return
     if  is_expired(chat_id):
         await update.message.reply_text("⚠️ Votre abonnement est expiré. Envoyez /renew pour demander un renouvellement.")
         return
- 
-    if not user_info:
-        await update.message.reply_text("❌ Vous n'êtes pas encore inscrit.")
+    if not is_approved(chat_id) and chat_id != ADMIN_CHAT_ID:
+        await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
         return
 
     if not history_items:
@@ -127,4 +123,30 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await send_long_message(context.bot, update.message.chat_id, history_text)
 
+async def assistant_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if context.user_data.get("assistant_mode"):
+        user_id = update.message.from_user.id
+        chat_id = update.message.chat_id
+        user_input = update.message.text
+
+        # Usual access control
+        if not is_approved(chat_id):
+            await update.message.reply_text("⛔ Accès refusé. Veuillez attendre la validation de votre abonnement.")
+            return
+
+        await update.message.chat.send_action(action=ChatAction.TYPING)
+        reply = ask_openrouter(user_id, user_input)
+        await update.message.reply_text(reply)
+        save_user_history(user_id, user_input, reply)
+        if user_id not in user_history:
+            user_history[user_id] = []
+        user_history[user_id].append({
+            "question": user_input,
+            "answer": reply
+        })
+  
+
+async def stop_assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["assistant_mode"] = False
+    await update.message.reply_text("Assistant désactivé. Tapez /assistant pour recommencer.")
 

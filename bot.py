@@ -48,7 +48,8 @@ USER_COMMANDS = [
     BotCommand("renew", "Renouveler votre abonnement"),
 ]
 
-ADMIN_COMMANDS = USER_COMMANDS + [
+ADMIN_COMMANDS =  [
+    BotCommand("start", "Commencer le bot "),  
     BotCommand("broadcast", "Envoyer un message à tous les utilisateurs"),
     BotCommand("users", "Voir la liste des utilisateurs"),
     BotCommand("change_name", "Modifier le nom d’un utilisateur"),
@@ -79,15 +80,21 @@ def main():
 
 
     conv_change_name = ConversationHandler(
-    entry_points=[CommandHandler("change_name", change_name_start)],
+    entry_points=[
+        CommandHandler("change_name", change_name_start),
+        MessageHandler(filters.Text("✏️ Changer Nom"), change_name_start),  # Add this line
+    ],
     states={
         ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_receive_user)],
         ASK_NEW_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_save)],
     },
     fallbacks=[],
-    )
+)
     conv_change_duration = ConversationHandler(
-    entry_points=[CommandHandler("change_duration", change_duration_start)],
+    entry_points=[
+        CommandHandler("change_duration", change_duration_start),
+        MessageHandler(filters.Text("⏳ Changer Durée"), change_name_start),
+        ],
     states={
         ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_receive_user)],
         ASK_NEW_DURATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_save)],
@@ -127,9 +134,13 @@ def main():
     # Add other command handlers
     app.add_handler(CommandHandler("remove", remove.remove))
     app.add_handler(CommandHandler("users", user.list_users))
+    app.add_handler(MessageHandler(filters.Text("👥 Liste Utilisateurs"), user.list_users))
+
     app.add_handler(CommandHandler("add_admin", admins.add_admin_command))
     app.add_handler(CommandHandler("remove_admin", admins.remove_admin_command))
     app.add_handler(CommandHandler("list_admins", admins.list_admins_command))
+    app.add_handler(MessageHandler(filters.Text("👑 Liste Admins"), admins.list_admins_command))
+
     app.add_handler(CommandHandler("broadcast", broadcast.broadcast))
     app.add_handler(conv_change_name)
     app.add_handler(conv_change_duration)
@@ -141,9 +152,11 @@ def main():
 
     app.add_handler(MessageHandler(filters.Text("🤖 Assistant AI"), ai_assistant.assistant))
     app.add_handler(MessageHandler(filters.Text("🧠 Historique AI"), ai_assistant.history))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.handle_message))
     app.add_handler(CallbackQueryHandler(handle_approval, pattern="^(approve|decline)_"))
     app.add_handler(CallbackQueryHandler(handle_renewal_approval, pattern="^renew_(approve|decline)_"))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.assistant_message))
+    app.add_handler(CommandHandler("stop", ai_assistant.stop_assistant))
+    
 
 
 

@@ -8,7 +8,10 @@ import sqlite3
 conn = sqlite3.connect("bot.db", check_same_thread=False)
 cursor = conn.cursor()
 ASK_USER_CHAT_ID, ASK_NEW_NAME, ASK_NEW_DURATION = range(3)
-
+admin_reply_keyboard = [
+    ["👥 Liste Utilisateurs", "👑 Liste Admins"],
+    ["✏️ Changer Nom", "⏳ Changer Durée"],
+]
 # Check admin decorator helper
 async def is_admin_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -44,7 +47,10 @@ async def change_name_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
     new_name = update.message.text
     chat_id = context.user_data.get("edit_chat_id")
     update_user_name(chat_id, new_name)
-    await update.message.reply_text(f"Nom mis à jour avec succès pour l'utilisateur {chat_id} : {new_name}", reply_markup=ReplyKeyboardRemove())
+    await update.message.reply_text(
+        f"Nom mis à jour avec succès pour l'utilisateur {chat_id} : {new_name}",
+        reply_markup=ReplyKeyboardMarkup(admin_reply_keyboard, resize_keyboard=True)
+    )
     return ConversationHandler.END
 
 # Change subscription duration command
@@ -96,7 +102,7 @@ async def change_duration_save(update: Update, context: ContextTypes.DEFAULT_TYP
 
     await update.message.reply_text(
         f"✅ Durée d'abonnement mise à jour : {months} mois.",
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardMarkup(admin_reply_keyboard, resize_keyboard=True)
     )
     return ConversationHandler.END
 

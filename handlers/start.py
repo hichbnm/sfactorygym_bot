@@ -19,8 +19,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Check if user is admin
     if chat_id == ADMIN_CHAT_ID:
+        admin_reply_keyboard = [
+            ["👥 Liste Utilisateurs", "👑 Liste Admins"],
+            ["✏️ Changer Nom", "⏳ Changer Durée"],
+        ]
         await update.message.reply_text(
-            " Bienvenue Admin ! "
+            " Bienvenue Admin ! ",
+            
         )
         await update.message.reply_text(
             "   Voici les commandes disponibles :\n"
@@ -30,7 +35,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "   /change_duration - Changer la durée d'abonnement d'un utilisateur\n"
             "   /list_admins - Lister les admins\n"
             "   /add_admin <chat_id> - Ajouter un admin\n" 
-            "   /remove_admin <chat_id> - Retirer un admin\n"           
+            "   /remove_admin <chat_id> - Retirer un admin\n"     ,
+
+
+            reply_markup=ReplyKeyboardMarkup(admin_reply_keyboard, resize_keyboard=True)      
         )
         return ConversationHandler.END
     
