@@ -88,7 +88,7 @@ def remove_user(chat_id):
     conn.commit()
 
 def get_all_users():
-    cursor.execute("SELECT chat_id , name  FROM users")
+    cursor.execute("SELECT chat_id, name, subscription_start, subscription_end FROM users")
     return cursor.fetchall()
 
 def get_subscription_end(chat_id):
@@ -194,3 +194,11 @@ def get_pending_approvals_count():
 def remove_user(chat_id):
     cursor.execute("DELETE FROM users WHERE chat_id = ?", (chat_id,))
     conn.commit()
+
+def get_user_by_id(chat_id):
+    conn = sqlite3.connect("bot.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT chat_id, name, subscription_start, subscription_end FROM users WHERE chat_id = ?", (chat_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user

@@ -11,10 +11,14 @@ from database.database import (
     get_pending_approvals_count,
     save_broadcast,
     remove_user,
-    is_admin
+    is_admin,
+    update_user_name,
+    get_user_by_id,  # <-- Add this line
 )
+
 from telegram import Bot
 import asyncio
+from datetime import datetime
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(BOT_TOKEN)  # Remove pool_size and pool_timeout
@@ -58,9 +62,24 @@ def dashboard():
     admins = get_all_admins()
     broadcasts_sent = get_broadcast_count()
     pending_approvals = get_pending_approvals_count()
+
+    # Calculate days left for each user
+    users_with_days = []
+    for user in users:
+        subscription_end = user[3]  # (chat_id, name, subscription_start, subscription_end)
+        days_left = ""
+        if subscription_end:
+            try:
+                end_date = datetime.strptime(subscription_end, "%Y-%m-%d").date()
+                today = datetime.today().date()
+                days_left = (end_date - today).days
+            except Exception:
+                days_left = "?"
+        users_with_days.append((*user, days_left))
+
     return render_template(
         "dashboard.html",
-        users=users,
+        users=users_with_days,
         admins=admins,
         broadcasts_sent=broadcasts_sent,
         pending_approvals=pending_approvals,
@@ -127,6 +146,34 @@ def test_message():
 @flask_app.route('/media/<path:filename>')
 def media(filename):
     return send_from_directory('media', filename)
+
+@flask_app.route("/edit_user/<chat_id>", methods=["GET", "POST"])
+def edit_user(chat_id):
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("login"))
+    user = get_user_by_id(chat_id)
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for("dashboard"))
+    # Calculate days left
+    subscription_end = user[3]
+    days_left = ""
+    if subscription_end:
+        try:
+            end_date = datetime.strptime(subscription_end, "%Y-%m-%d").date()
+            today = datetime.today().date()
+            days_left = (end_date - today).days
+        except Exception:
+            days_left = "?"
+    if request.method == "POST":
+        new_name = request.form.get("name")
+        if not new_name:
+            flash("Name is required.", "danger")
+            return render_template("edit_user.html", user=user, days_left=days_left)
+        update_user_name(chat_id, new_name)
+        flash("User updated successfully!", "success")
+        return redirect(url_for("dashboard"))
+    return render_template("edit_user.html", user=user, days_left=days_left)
 
 # -------------------- Run Flask --------------------
 def run_flask():

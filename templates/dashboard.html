@@ -60,6 +60,8 @@
                         <tr>
                             <th>Chat ID</th>
                             <th>Name</th>
+                            <th>Subscription End</th>
+                            <th>Days Left</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -68,7 +70,10 @@
                         <tr>
                             <td>{{ user[0] }}</td>
                             <td>{{ user[1] }}</td>
+                            <td>{{ user[3] }}</td>
+                            <td>{{ user[4] }}</td>
                             <td>
+                                <a href="/edit_user/{{ user[0] }}" class="btn btn-primary">Edit</a>
                                 <a href="/remove_user/{{ user[0] }}" class="btn btn-danger">Remove</a>
                             </td>
                         </tr>
