@@ -29,6 +29,14 @@ CREATE TABLE IF NOT EXISTS user_history (
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 )
 """)
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS broadcasts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT,
+    sent_count INTEGER,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+""")
 
 conn.commit()
 
@@ -165,5 +173,24 @@ def renew_subscription(chat_id, months=1):
     conn.commit()
 
 def get_all_approved_users():
-         cursor.execute("SELECT chat_id, name FROM users WHERE status = 'approved'")
-         return cursor.fetchall()
+    cursor.execute("SELECT chat_id, name FROM users WHERE status = 'approved'")
+    return cursor.fetchall()
+
+def save_broadcast(message, sent_count):
+    cursor.execute(
+        "INSERT INTO broadcasts (message, sent_count) VALUES (?, ?)",
+        (message, sent_count)
+    )
+    conn.commit()
+
+def get_broadcast_count():
+    cursor.execute("SELECT COUNT(*) FROM broadcasts")
+    return cursor.fetchone()[0]
+
+def get_pending_approvals_count():
+    cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'pending'")
+    return cursor.fetchone()[0]
+
+def remove_user(chat_id):
+    cursor.execute("DELETE FROM users WHERE chat_id = ?", (chat_id,))
+    conn.commit()

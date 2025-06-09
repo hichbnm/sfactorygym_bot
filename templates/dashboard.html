@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Factory Gym</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="/media/sfactory.jpg" alt="S Factory Gym Logo" class="sidebar-logo-img">
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#users"><i class="fa-solid fa-users"></i></a></li>
+                    <li><a href="#admins"><i class="fa-solid fa-user-shield"></i></a></li>
+                    <li><a href="#broadcasts"><i class="fa-solid fa-bullhorn"></i></a></li>
+                    <li><a href="#add-admin"><i class="fa-solid fa-user-plus"></i></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-avatar">
+                <!-- Avatar image removed -->
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 class="dynamic-title"><i class="fa-solid fa-gear"></i> S Factory Gym</h1>
+                <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+                    {% if admin_name %}
+                        <span style="font-weight:600; color:#ff7043;">{{ admin_name }}</span>
+                    {% endif %}
+                    <a href="/logout" class="btn btn-danger" style="margin-left:8px;">Logout</a>
+                </div>
+            </header>
+            <section class="dashboard-cards">
+                <div class="card stat-card">
+                    <div class="stat-number">{{ admins|length }}</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">{{ users|length }}</div>
+                    <div class="stat-label">Users</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">{{ broadcasts_sent }}</div>
+                    <div class="stat-label">Broadcasts Sent</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number">{{ pending_approvals }}</div>
+                    <div class="stat-label">Pending Approvals</div>
+                </div>
+            </section>
+            <section id="users" class="card">
+                <h2>Users</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Chat ID</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user[0] }}</td>
+                            <td>{{ user[1] }}</td>
+                            <td>
+                                <a href="/remove_user/{{ user[0] }}" class="btn btn-danger">Remove</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <section id="admins" class="card">
+                <h2>Admins</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Chat ID</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in admins %}
+                        <tr>
+                            <td>{{ admin[0] }}</td>
+                            <td>{{ admin[1] }}</td>
+                            <td>
+                                <a href="/remove_admin/{{ admin[0] }}" class="btn btn-danger">Remove</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <section id="broadcasts" class="card">
+                <h2>Broadcasts</h2>
+                <form action="/broadcast" method="POST">
+                    <textarea name="message" placeholder="Enter your broadcast message here..."></textarea>
+                    <button type="submit" class="btn btn-primary">Send Broadcast</button>
+                </form>
+            </section>
+            <section id="add-admin" class="card">
+                <h2>Add Admin</h2>
+                <form action="/add_admin" method="POST">
+                    <input type="text" name="chat_id" placeholder="Enter Admin Chat ID" required>
+                    <input type="text" name="name" placeholder="Enter Admin Name" required>
+                    <button type="submit" class="btn btn-primary">Add Admin</button>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

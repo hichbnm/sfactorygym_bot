@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - S Factory Gym</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff7043 0%, #ff9800 100%);
+        }
+        .login-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 32px rgba(255,112,67,0.15);
+            padding: 40px 32px 32px 32px;
+            width: 100%;
+            max-width: 370px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .login-container h2 {
+            color: #ff7043;
+            margin-bottom: 24px;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        .login-container form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .login-container input {
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #ffd180;
+            font-size: 1rem;
+        }
+        .login-container button {
+            background: #ff7043;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-container button:hover {
+            background: #ff9800;
+        }
+        .flash {
+            color: #e53935;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Admin Login</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <form method="POST">
+            <input type="text" name="chat_id" placeholder="Admin ID" required>
+            <input type="text" name="name" placeholder="Admin Name" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html> 

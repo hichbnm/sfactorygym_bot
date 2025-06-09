@@ -14,8 +14,9 @@ A Telegram bot to manage gym (salle de sport) memberships. It allows users to re
 - 📋 `/myinfo` — View your subscription details
 - 🤖 `/assistant` — Talk with the AI assistant
 - 🧠 `/assistant_history` — View your AI chat history
--    `/renew` — Renew your subscription
-
+- 🔄 `/renew` — Renew your subscription
+- ⚠️ Automatic notifications for expiring subscriptions
+- 🛑 Automatic deactivation of expired subscriptions
 
 ### 🔧 Admin Features
 
@@ -27,6 +28,22 @@ A Telegram bot to manage gym (salle de sport) memberships. It allows users to re
 - `/admins` — List all admins
 - ✅ Inline approval or rejection of subscription requests
 
+- 🌐 Web Dashboard Interface:
+  - User management
+  - Admin management
+  - Broadcast messages
+  - View pending approvals
+  - View broadcast statistics
+  - Secure admin login
+
+### 🤖 AI Assistant Features
+
+- Natural language conversation
+- Context-aware responses
+- Chat history tracking
+- `/stop` command to end conversation
+- Persistent chat history per user
+
 ---
 
 ## 🚀 Getting Started
@@ -36,7 +53,7 @@ A Telegram bot to manage gym (salle de sport) memberships. It allows users to re
 * Python 3.10+
 * Docker & Docker Compose
 * Telegram Bot Token
-* MySQL or PostgreSQL database
+* SQLite database (included)
 
 ### ⚙️ Environment Setup
 
@@ -45,10 +62,7 @@ Create a `.env` file at the root:
 ```env
 BOT_TOKEN=your_telegram_bot_token
 ADMIN_CHAT_ID=your_telegram_user_id
-DB_HOST=db
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=your_db_name
+OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
 ---
@@ -58,9 +72,10 @@ DB_NAME=your_db_name
 To run the bot with Docker:
 
 ```bash
-
 docker-compose up --build -d
 ```
+
+The web dashboard will be available at `http://localhost:5001`
 
 ---
 
@@ -75,8 +90,10 @@ pip install -r requirements.txt
 Run the bot:
 
 ```bash
-python bot/main.py
+python bot.py
 ```
+
+The web dashboard will be available at `http://localhost:5001`
 
 ---
 
@@ -88,12 +105,14 @@ python bot/main.py
 4. Request is sent to admin
 5. Admin accepts or declines using inline buttons
 6. If accepted:
-     - User can access /myinfo, /assistant, and /assistant_history
-     - User is notified and has no access to features
-
-
-
-
+   - User can access /myinfo, /assistant, and /assistant_history
+   - User is notified and has access to features
+7. Before expiration:
+   - User receives notification
+   - Can use /renew to extend subscription
+8. After expiration:
+   - Account is automatically deactivated
+   - User must renew to regain access
 
 ---
 
@@ -101,12 +120,15 @@ python bot/main.py
 
 ```
 .
-├── bot/                  # Bot logic and handlers
-├── database/             # DB connection and utility functions
-├── media/                # Bot images/logos
-├── docker/               # Docker-related files
+├── bot.py              # Main bot logic
+├── flask_api.py        # Web dashboard API
+├── database/           # Database operations
+├── handlers/           # Command handlers
+├── templates/          # Web dashboard templates
+├── static/            # Web dashboard assets
+├── media/             # Bot images/logos
 ├── docker-compose.yml
-├── .env.example
+├── Dockerfile
 ├── requirements.txt
 └── README.md
 ```
@@ -126,12 +148,44 @@ python bot/main.py
 
 ---
 
+## 🌐 Web Dashboard Features
+
+- **Login System**
+  - Secure admin authentication
+  - Session management
+  - Logout functionality
+
+- **Dashboard Overview**
+  - Total users count
+  - Pending approvals
+  - Broadcast statistics
+  - Admin list
+
+- **User Management**
+  - View all users
+  - Remove users
+  - View subscription status
+
+- **Admin Management**
+  - Add new admins
+  - Remove existing admins
+  - View admin list
+
+- **Broadcast System**
+  - Send messages to all users
+  - Track broadcast success
+  - View broadcast history
+
+---
+
 ## 🧐 Tech Stack
 
 * `python-telegram-bot`
-* MySQL/PostgreSQL
+* Flask (Web Dashboard)
+* SQLite
 * Docker / Docker Compose
 * Python 3.10+
+* APScheduler (for automated tasks)
 
 ---
 

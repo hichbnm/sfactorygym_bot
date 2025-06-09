@@ -3,3 +3,4 @@ python-dotenv
 watchdog
 python-telegram-bot[job-queue]
 requests
+flask

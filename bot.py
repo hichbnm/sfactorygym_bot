@@ -5,11 +5,12 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-from telegram.ext import CallbackQueryHandler  # ✅ Correct
+from telegram.ext import CallbackQueryHandler
 from handlers.admin_edit import handle_approval
 from dotenv import load_dotenv
 from datetime import time
 import os
+from threading import Thread
 
 from handlers.admin_edit import (
     change_name_start,
@@ -23,15 +24,14 @@ from handlers.admin_edit import (
     ASK_NEW_DURATION,
 )
 from handlers import start, remove, user, admins, broadcast, ai_assistant
-from database.database import add_admin, is_admin , get_all_admins
+from database.database import add_admin, is_admin, get_all_admins
+from flask_api import run_flask  # Import the Flask API
 
-from handlers.user import myinfo , notify_expiring_users , renew, renew_duration
+from handlers.user import myinfo, notify_expiring_users, renew, renew_duration
 from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler
 from handlers.admin_edit import handle_renewal_approval
 from telegram import BotCommand
-
-
 
 # Load environment variables from .env file
 load_dotenv()
@@ -48,8 +48,8 @@ USER_COMMANDS = [
     BotCommand("renew", "Renouveler votre abonnement"),
 ]
 
-ADMIN_COMMANDS =  [
-    BotCommand("start", "Commencer le bot "),  
+ADMIN_COMMANDS = [
+    BotCommand("start", "Commencer le bot "),
     BotCommand("broadcast", "Envoyer un message à tous les utilisateurs"),
     BotCommand("users", "Voir la liste des utilisateurs"),
     BotCommand("change_name", "Modifier le nom d’un utilisateur"),
@@ -63,6 +63,7 @@ async def set_commands(app):
     await app.bot.set_my_commands(USER_COMMANDS)
     for admin_id, _ in get_all_admins():
         await app.bot.set_my_commands(ADMIN_COMMANDS, scope={"type": "chat", "chat_id": admin_id})
+
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
     app.post_init = set_commands
@@ -72,38 +73,33 @@ def main():
 
     job_queue = app.job_queue
     job_queue.run_daily(
-    notify_expiring_users,
-    time=time(hour=9, minute=0),  # runs every day at 09:00
-    name="expiry_notification_daily"
+        notify_expiring_users,
+        time=time(hour=9, minute=0),  # runs every day at 09:00
+        name="expiry_notification_daily"
     )
-    
-
 
     conv_change_name = ConversationHandler(
-    entry_points=[
-        CommandHandler("change_name", change_name_start),
-        MessageHandler(filters.Text("✏️ Changer Nom"), change_name_start),  # Add this line
-    ],
-    states={
-        ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_receive_user)],
-        ASK_NEW_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_save)],
-    },
-    fallbacks=[],
-)
-    conv_change_duration = ConversationHandler(
-    entry_points=[
-        CommandHandler("change_duration", change_duration_start),
-        MessageHandler(filters.Text("⏳ Changer Durée"), change_name_start),
+        entry_points=[
+            CommandHandler("change_name", change_name_start),
+            MessageHandler(filters.Text("✏️ Changer Nom"), change_name_start),
         ],
-    states={
-        ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_receive_user)],
-        ASK_NEW_DURATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_save)],
-    },
-    fallbacks=[],
-)
-
-
-
+        states={
+            ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_receive_user)],
+            ASK_NEW_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_name_save)],
+        },
+        fallbacks=[],
+    )
+    conv_change_duration = ConversationHandler(
+        entry_points=[
+            CommandHandler("change_duration", change_duration_start),
+            MessageHandler(filters.Text("⏳ Changer Durée"), change_name_start),
+        ],
+        states={
+            ASK_USER_CHAT_ID: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_receive_user)],
+            ASK_NEW_DURATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_duration_save)],
+        },
+        fallbacks=[],
+    )
 
     # Ensure admin is in database
     if not is_admin(ADMIN_CHAT_ID):
@@ -120,15 +116,15 @@ def main():
     )
     app.add_handler(conv_handler)
     conv_renew = ConversationHandler(
-    entry_points=[
-        CommandHandler("renew", renew),
-        MessageHandler(filters.Text("🔄 Renouveler"), renew),  # Add this line here!
-    ],
-    states={
-        "RENEW_DURATION": [MessageHandler(filters.TEXT & ~filters.COMMAND, renew_duration)],
-    },
-    fallbacks=[],
-)
+        entry_points=[
+            CommandHandler("renew", renew),
+            MessageHandler(filters.Text("🔄 Renouveler"), renew),
+        ],
+        states={
+            "RENEW_DURATION": [MessageHandler(filters.TEXT & ~filters.COMMAND, renew_duration)],
+        },
+        fallbacks=[],
+    )
     app.add_handler(conv_renew)
 
     # Add other command handlers
@@ -156,13 +152,13 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_renewal_approval, pattern="^renew_(approve|decline)_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.assistant_message))
     app.add_handler(CommandHandler("stop", ai_assistant.stop_assistant))
-    
 
-
+    # --- Start Flask API for broadcast ---
+    Thread(target=run_flask, daemon=True).start()
+    # --- End Flask API for broadcast ---
 
     # Start polling updates from Telegram
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
