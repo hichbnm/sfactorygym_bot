@@ -8,15 +8,10 @@ services:
       - "5001:5001"
     env_file:
       - .env
-    volumes:
-      - ./app       # Mount source code
-      - ./bot.db:/app/bot.db  # SQLite DB persistence
+
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  db_data:

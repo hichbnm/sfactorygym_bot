@@ -3,9 +3,10 @@ from telegram.ext import ContextTypes, ConversationHandler
 from database.database import add_user, user_exists , is_admin , get_all_admins , is_approved , disable_expired_users, is_pending
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
 import os
-
+load_dotenv()
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID"))
 ASK_NAME, ASK_DURATION = range(2)
 CHANGE_NAME_USER, CHANGE_NAME_NEW = range(2)
