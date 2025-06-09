@@ -8,4 +8,4 @@ users - Voir la liste des utilisateurs (admin uniquement)
 change_name - Modifier le nom d’un utilisateur (admin uniquement) 
 change_duration - Modifier la durée d’abonnement d’un utilisateur (admin uniquement)  
 add_admin - Ajouter un admin par ID (admin uniquement)
-list_admins - Voir la liste des admins (admin uniquement)
+list_admins - Voir la liste des admins (admin uniquement) - 
