@@ -88,7 +88,7 @@ def remove_user(chat_id):
     conn.commit()
 
 def get_all_users():
-    cursor.execute("SELECT chat_id , name  FROM users")
+    cursor.execute("SELECT chat_id, name, subscription_start, subscription_end, status FROM users")
     return cursor.fetchall()
 
 def get_subscription_end(chat_id):
@@ -120,11 +120,7 @@ def is_admin(chat_id):
     return cursor.fetchone() is not None
 
 def get_all_admins():
-    cursor.execute("""
-        SELECT admins.chat_id, users.name 
-        FROM admins
-        LEFT JOIN users ON admins.chat_id = users.chat_id
-    """)
+    cursor.execute("SELECT chat_id, name FROM admins")
     return cursor.fetchall()
 
 def update_user_name(chat_id, new_name):
@@ -191,6 +187,22 @@ def get_pending_approvals_count():
     cursor.execute("SELECT COUNT(*) FROM users WHERE status = 'pending'")
     return cursor.fetchone()[0]
 
-def remove_user(chat_id):
+def get_all_pending_users():
+    cursor.execute("SELECT chat_id, name, subscription_start, subscription_end FROM users WHERE status = 'pending'")
+    return cursor.fetchall()
+
+def approve_user_db(chat_id):
+    cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
+    conn.commit()
+
+def decline_user_db(chat_id):
     cursor.execute("DELETE FROM users WHERE chat_id = ?", (chat_id,))
     conn.commit()
+
+def get_user_by_id(chat_id):
+    conn = sqlite3.connect("bot.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT chat_id, name, subscription_start, subscription_end FROM users WHERE chat_id = ?", (chat_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user

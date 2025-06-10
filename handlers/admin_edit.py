@@ -4,6 +4,7 @@ from database.database import update_user_name, update_user_subscription, user_e
 from datetime import datetime
 from telegram import ReplyKeyboardMarkup
 import sqlite3
+import asyncio # Import asyncio
 
 conn = sqlite3.connect("bot.db", check_same_thread=False)
 cursor = conn.cursor()
@@ -12,6 +13,47 @@ admin_reply_keyboard = [
     ["👥 Liste Utilisateurs", "👑 Liste Admins"],
     ["✏️ Changer Nom", "⏳ Changer Durée"],
 ]
+
+# User Reply Keyboard Definition (for messages to users)
+USER_REPLY_KEYBOARD = [
+    ["📋 Mes Infos", "🤖 Assistant AI"],
+    ["🧠 Historique AI", "🔄 Renouveler"]
+]
+USER_MARKUP = ReplyKeyboardMarkup(USER_REPLY_KEYBOARD, resize_keyboard=True)
+
+# Helper function to send approval/decline messages to user
+async def _send_user_status_notification(chat_id: int, bot, action: str):
+    if action == "approve":
+        with open("media/sfactory.jpg", "rb") as photo:
+            await bot.send_photo(chat_id=chat_id, photo=photo)
+        await bot.send_message(chat_id, "✅ Votre abonnement a été validé. Bienvenue !")
+        await bot.send_message(
+            chat_id,
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d'abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l'historique de vos discussions IA 🧠\n"
+            "   /renew - Renouveler votre abonnement 🔄\n",
+            reply_markup=USER_MARKUP
+        )
+    elif action == "decline":
+        await bot.send_message(chat_id, "❌ Votre demande d'abonnement a été refusée.")
+    elif action == "renew_approve": # For renewal approval
+        with open("media/sfactory.jpg", "rb") as photo:
+            await bot.send_photo(chat_id=chat_id, photo=photo)
+        await bot.send_message(chat_id, "✅ Votre renouvellement d'abonnement a été validé. Bienvenue à nouveau !")
+        await bot.send_message(
+            chat_id,
+            "   Voici les commandes disponibles :\n"
+            "   /myinfo - Voir vos informations d'abonnement \n"
+            "   /assistant - Parler avec l'assistant IA 🤖 \n"
+            "   /assistant_history - Voir l'historique de vos discussions IA 🧠\n"
+            "   /renew - Renouveler votre abonnement 🔄\n",
+            reply_markup=USER_MARKUP
+        )
+    elif action == "renew_decline": # For renewal decline
+        await bot.send_message(chat_id, "❌ Votre demande de renouvellement a été refusée.")
+
 # Check admin decorator helper
 async def is_admin_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -116,30 +158,12 @@ async def handle_approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "approve":
         cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
         conn.commit()
-
-        reply_keyboard = [
-            ["📋 Mes Infos", "🤖 Assistant AI"],
-            ["🧠 Historique AI", "🔄 Renouveler"]
-       ]
-        markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
-        with open("media/sfactory.jpg", "rb") as photo:
-            await context.bot.send_photo(chat_id=chat_id, photo=photo)
-
-        await context.bot.send_message(chat_id, "✅ Votre abonnement a été validé. Bienvenue !")
-        await context.bot.send_message(
-            chat_id,
-            "   Voici les commandes disponibles :\n"
-            "   /myinfo - Voir vos informations d’abonnement \n"
-            "   /assistant - Parler avec l'assistant IA 🤖 \n"
-            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n"
-            "   /renew - Renouveler votre abonnement 🔄\n",
-            reply_markup=markup
-        )
+        await _send_user_status_notification(chat_id, context.bot, "approve")
         await query.edit_message_text("✅ Utilisateur approuvé.")
     else:
         cursor.execute("DELETE FROM users WHERE chat_id = ?", (chat_id,))
         conn.commit()
-        await context.bot.send_message(chat_id, "❌ Votre demande d'abonnement a été refusée.")
+        await _send_user_status_notification(chat_id, context.bot, "decline")
         await query.edit_message_text("❌ Demande refusée.")
 
 from telegram.ext import CallbackQueryHandler
@@ -150,35 +174,17 @@ async def handle_renewal_approval(update: Update, context: ContextTypes.DEFAULT_
     await query.answer()
     data = query.data
     parts = data.split("_")
-    action = parts[1]
+    action_prefix = parts[0] # e.g., 'renew'
+    action = parts[1] # e.g., 'approve' or 'decline'
     chat_id = int(parts[2])
 
     if action == "approve":
-        reply_keyboard = [
-            ["📋 Mes Infos", "🤖 Assistant AI"],
-            ["🧠 Historique AI", "🔄 Renouveler"]
-       ]
-        markup = ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True)
-        with open("media/sfactory.jpg", "rb") as photo:
-         await context.bot.send_photo(chat_id=chat_id, photo=photo)
-
-        # Approve: set status to 'approved'
         cursor.execute("UPDATE users SET status = 'approved' WHERE chat_id = ?", (chat_id,))
         conn.commit()
-        await context.bot.send_message(chat_id, "✅ Votre renouvellement d'abonnement a été validé. Bienvenue à nouveau !")
-        await context.bot.send_message(
-            chat_id,
-            "   Voici les commandes disponibles :\n"
-            "   /myinfo - Voir vos informations d’abonnement \n"
-            "   /assistant - Parler avec l'assistant IA 🤖 \n"
-            "   /assistant_history - Voir l’historique de vos discussions IA 🧠\n"
-            "   /renew - Renouveler votre abonnement 🔄\n",
-            reply_markup=markup
-        )
+        await _send_user_status_notification(chat_id, context.bot, "renew_approve")
         await query.edit_message_text("✅ Renouvellement approuvé.")
     elif action == "decline":
-        # Decline: set status to 'expired'
         cursor.execute("UPDATE users SET status = 'expired' WHERE chat_id = ?", (chat_id,))
         conn.commit()
-        await context.bot.send_message(chat_id, "❌ Votre demande de renouvellement a été refusée.")
+        await _send_user_status_notification(chat_id, context.bot, "renew_decline")
         await query.edit_message_text("❌ Renouvellement refusé.")

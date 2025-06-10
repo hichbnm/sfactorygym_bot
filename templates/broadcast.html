@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Factory Gym - Broadcast</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="/media/sfactory.jpg" alt="S Factory Gym Logo" class="sidebar-logo-img">
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}" data-tooltip="Users"><i class="fa-solid fa-users"></i></a></li>
+                    <li><a href="{{ url_for('dashboard') }}" data-tooltip="Admins"><i class="fa-solid fa-user-shield"></i></a></li>
+                    <li><a href="/pending_approvals" data-tooltip="Pending Approvals">
+                        <i class="fa-solid fa-hourglass-start"></i>
+                        {% if pending_approvals > 0 %}
+                            <span class="notification-badge">{{ pending_approvals }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="/broadcast" data-tooltip="Broadcast"><i class="fa-solid fa-bullhorn"></i></a></li>
+                    <li><a href="/add_admin" data-tooltip="Add Admin"><i class="fa-solid fa-user-plus"></i></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-avatar">
+                <!-- Avatar image removed -->
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 class="dynamic-title"><i class="fa-solid fa-bullhorn"></i> Broadcast Message</h1>
+                <div class="header-actions">
+                    {% if admin_name %}
+                        <span class="admin-name">{{ admin_name }}</span>
+                    {% endif %}
+                    <a href="/logout" class="btn btn-danger">Logout</a>
+                </div>
+            </header>
+            <section class="card">
+                <h2>Send Broadcast Message</h2>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                <form action="/broadcast" method="POST" class="broadcast-form">
+                    <div class="form-group">
+                        <textarea name="message" placeholder="Enter your broadcast message here..." required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Broadcast
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html> 

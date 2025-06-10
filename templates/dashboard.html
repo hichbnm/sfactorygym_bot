@@ -11,14 +11,22 @@
     <div class="dashboard-container">
         <aside class="sidebar">
             <div class="sidebar-logo">
-                <img src="/media/sfactory.jpg" alt="S Factory Gym Logo" class="sidebar-logo-img">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="/media/sfactory.jpg" alt="S Factory Gym Logo" class="sidebar-logo-img">
+                </a>
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="#users"><i class="fa-solid fa-users"></i></a></li>
-                    <li><a href="#admins"><i class="fa-solid fa-user-shield"></i></a></li>
-                    <li><a href="#broadcasts"><i class="fa-solid fa-bullhorn"></i></a></li>
-                    <li><a href="#add-admin"><i class="fa-solid fa-user-plus"></i></a></li>
+                    <li><a href="#users" data-tooltip="Users"><i class="fa-solid fa-users"></i></a></li>
+                    <li><a href="#admins" data-tooltip="Admins"><i class="fa-solid fa-user-shield"></i></a></li>
+                    <li><a href="/pending_approvals" data-tooltip="Pending Approvals">
+                        <i class="fa-solid fa-hourglass-start"></i>
+                        {% if pending_approvals > 0 %}
+                            <span class="notification-badge">{{ pending_approvals }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="/broadcast" data-tooltip="Broadcast"><i class="fa-solid fa-bullhorn"></i></a></li>
+                    <li><a href="/add_admin" data-tooltip="Add Admin"><i class="fa-solid fa-user-plus"></i></a></li>
                 </ul>
             </nav>
             <div class="sidebar-avatar">
@@ -28,11 +36,11 @@
         <main class="main-content">
             <header class="dashboard-header">
                 <h1 class="dynamic-title"><i class="fa-solid fa-gear"></i> S Factory Gym</h1>
-                <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+                <div class="header-actions">
                     {% if admin_name %}
-                        <span style="font-weight:600; color:#ff7043;">{{ admin_name }}</span>
+                        <span class="admin-name">{{ admin_name }}</span>
                     {% endif %}
-                    <a href="/logout" class="btn btn-danger" style="margin-left:8px;">Logout</a>
+                    <a href="/logout" class="btn btn-danger">Logout</a>
                 </div>
             </header>
             <section class="dashboard-cards">
@@ -60,6 +68,9 @@
                         <tr>
                             <th>Chat ID</th>
                             <th>Name</th>
+                            <th>Subscription End</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -68,16 +79,41 @@
                         <tr>
                             <td>{{ user[0] }}</td>
                             <td>{{ user[1] }}</td>
+                            <td>{{ user[3] }}</td>
+                            <td>{{ user[4] }}</td>
+                            <td>{{ user[5] }}</td>
                             <td>
-                                <a href="/remove_user/{{ user[0] }}" class="btn btn-danger">Remove</a>
+                                <a href="/edit_user/{{ user[0] }}" class="btn btn-primary btn-action">Edit</a>
+                                <a href="/remove_user/{{ user[0] }}" class="btn btn-danger btn-action">Remove</a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </section>
+
+            <section id="pending-approvals" class="card">
+                <div class="card-header-with-button">
+                    <h2>Pending Approvals ({{ pending_approvals }})</h2>
+                    <a href="/pending_approvals" class="btn btn-primary">
+                        <i class="fas fa-hourglass-start"></i> View Requests
+                    </a>
+                </div>
+                <p class="card-description">
+                    Review and manage new user registration requests. Accept or decline subscriptions directly from this section.
+                </p>
+            </section>
+
             <section id="admins" class="card">
-                <h2>Admins</h2>
+                <div class="card-header-with-button">
+                    <h2>Admins</h2>
+                    <a href="/add_admin" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Add Admin
+                    </a>
+                </div>
+                <p class="card-description">
+                    Add new administrators to manage the bot. Only existing administrators can add new ones.
+                </p>
                 <table>
                     <thead>
                         <tr>
@@ -92,28 +128,26 @@
                             <td>{{ admin[0] }}</td>
                             <td>{{ admin[1] }}</td>
                             <td>
-                                <a href="/remove_admin/{{ admin[0] }}" class="btn btn-danger">Remove</a>
+                                <a href="/remove_admin/{{ admin[0] }}" class="btn btn-danger btn-action">Remove</a>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </section>
+
             <section id="broadcasts" class="card">
-                <h2>Broadcasts</h2>
-                <form action="/broadcast" method="POST">
-                    <textarea name="message" placeholder="Enter your broadcast message here..."></textarea>
-                    <button type="submit" class="btn btn-primary">Send Broadcast</button>
-                </form>
+                <div class="card-header-with-button">
+                    <h2>Broadcasts</h2>
+                    <a href="/broadcast" class="btn btn-primary">
+                        <i class="fas fa-bullhorn"></i> Send Broadcast
+                    </a>
+                </div>
+                <p class="card-description">
+                    Send messages or photos to all users in the system. You can include text messages, photos, or both in your broadcasts.
+                </p>
             </section>
-            <section id="add-admin" class="card">
-                <h2>Add Admin</h2>
-                <form action="/add_admin" method="POST">
-                    <input type="text" name="chat_id" placeholder="Enter Admin Chat ID" required>
-                    <input type="text" name="name" placeholder="Enter Admin Name" required>
-                    <button type="submit" class="btn btn-primary">Add Admin</button>
-                </form>
-            </section>
+
         </main>
     </div>
 </body>

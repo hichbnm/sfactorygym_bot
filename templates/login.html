@@ -3,82 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - S Factory Gym</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #ff7043;
+            --primary-dark: #ff9800;
+            --bg-dark: #0d2329;
+            --white: #fff;
+            --input-bg: #18343b;
+            --input-border: #2c4a52;
+            --input-text: #fff;
+            --button-bg: #ff7043;
+            --button-hover: #ff9800;
+            --divider: #24444c;
+            --error: #e74c3c;
+        }
+        html, body {
+            height: 100%;
+        }
         body {
+            min-height: 100vh;
+            background: var(--bg-dark);
+            color: var(--white);
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #ff7043 0%, #ff9800 100%);
         }
-        .login-container {
-            background: #fff;
+        .split-container {
+            width: 900px;
+            max-width: 98vw;
+            height: 520px;
+            background: var(--bg-dark);
             border-radius: 18px;
-            box-shadow: 0 4px 32px rgba(255,112,67,0.15);
-            padding: 40px 32px 32px 32px;
-            width: 100%;
-            max-width: 370px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+            display: flex;
+            overflow: hidden;
+        }
+        .split-left {
+            flex: 1.1;
+            background: var(--bg-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
-        .login-container h2 {
-            color: #ff7043;
-            margin-bottom: 24px;
-            font-size: 2rem;
-            font-weight: 800;
+        .logo-img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            border-radius: 50%;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 24px rgba(255,112,67,0.15);
+            background: #fff;
         }
-        .login-container form {
-            width: 100%;
+        .project-name {
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+        .divider {
+            width: 1px;
+            background: var(--divider);
+            height: 80%;
+            align-self: center;
+        }
+        .split-right {
+            flex: 1.5;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 32px;
+            background: var(--bg-dark);
         }
-        .login-container input {
+        .welcome {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--white);
+        }
+        .welcome-desc {
+            font-size: 1rem;
+            color: #b0bec5;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+        .login-form {
+            width: 100%;
+            max-width: 340px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #b0bec5;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
             padding: 12px 14px;
             border-radius: 8px;
-            border: 1.5px solid #ffd180;
+            border: 1.5px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--input-text);
             font-size: 1rem;
+            transition: border 0.2s;
         }
-        .login-container button {
-            background: #ff7043;
-            color: #fff;
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--button-bg);
+            color: var(--white);
             border: none;
             border-radius: 8px;
-            padding: 12px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            margin-top: 10px;
+            transition: background 0.2s, transform 0.1s;
         }
-        .login-container button:hover {
-            background: #ff9800;
+        .login-button:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
         }
-        .flash {
-            color: #e53935;
+        .forgot-link {
+            display: block;
+            text-align: right;
+            margin-top: 10px;
+            color: #b0bec5;
+            font-size: 0.97rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover {
+            color: var(--primary);
+        }
+        .flash-messages {
+            margin-bottom: 18px;
+        }
+        .flash-message {
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 10px;
-            font-weight: 600;
-            text-align: center;
+            font-size: 14px;
+            background: #fee2e2;
+            color: var(--error);
+            border: 1px solid #fecaca;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 900px) {
+            .split-container { flex-direction: column; height: auto; min-height: 100vh; }
+            .divider { display: none; }
+            .split-left, .split-right { flex: unset; width: 100%; height: auto; }
+            .split-left { padding: 30px 10px 10px 10px; }
+            .split-right { padding: 30px 10px 30px 10px; }
+        }
+        @media (max-width: 500px) {
+            .split-container { width: 100vw; min-width: 0; }
+            .login-form { max-width: 100%; }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Admin Login</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        <form method="POST">
-            <input type="text" name="chat_id" placeholder="Admin ID" required>
-            <input type="text" name="name" placeholder="Admin Name" required>
-            <button type="submit">Login</button>
-        </form>
+    <div class="split-container">
+        <div class="split-left">
+            <img src="/media/sfactory.jpg" alt="Logo" class="logo-img">
+            <div class="project-name">S Factory Gym</div>
+        </div>
+        <div class="divider"></div>
+        <div class="split-right">
+            <div class="welcome">Welcome</div>
+            <div class="login-form">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <label for="chat_id">Username</label>
+                        <input type="text" id="chat_id" name="chat_id" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Password</label>
+                        <input type="password" id="name" name="name" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="login-button">Login</button>
+                </form>
+            </div>
+        </div>
     </div>
 </body>
 </html> 

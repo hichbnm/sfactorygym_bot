@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from datetime import time
 import os
 from threading import Thread
+from telegram.error import BadRequest
 
 from handlers.admin_edit import (
     change_name_start,
@@ -32,6 +33,7 @@ from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler
 from handlers.admin_edit import handle_renewal_approval
 from telegram import BotCommand
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -61,8 +63,16 @@ ADMIN_COMMANDS = [
 
 async def set_commands(app):
     await app.bot.set_my_commands(USER_COMMANDS)
-    for admin_id, _ in get_all_admins():
-        await app.bot.set_my_commands(ADMIN_COMMANDS, scope={"type": "chat", "chat_id": admin_id})
+    admins = get_all_admins()
+    if not admins:
+        print("No admins found.")
+        return
+    for admin_id, _ in admins:
+        try:
+            await app.bot.set_my_commands(ADMIN_COMMANDS, scope={"type": "chat", "chat_id": admin_id})
+        except BadRequest as e:
+            print(f"Failed to set commands for admin {admin_id}: {e}")
+            continue  # Skip invalid admin IDs and continue setting commands for others
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()

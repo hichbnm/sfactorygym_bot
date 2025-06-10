@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S Factory Gym - Pending Approvals</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <a href="{{ url_for('dashboard') }}">
+                    <img src="/media/sfactory.jpg" alt="S Factory Gym Logo" class="sidebar-logo-img">
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}" data-tooltip="Users"><i class="fa-solid fa-users"></i></a></li>
+                    <li><a href="{{ url_for('dashboard') }}" data-tooltip="Admins"><i class="fa-solid fa-user-shield"></i></a></li>
+                    <li><a href="/pending_approvals" data-tooltip="Pending Approvals">
+                        <i class="fa-solid fa-hourglass-start"></i>
+                        {% if pending_users|length > 0 %}
+                            <span class="notification-badge">{{ pending_users|length }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="/broadcast" data-tooltip="Broadcast"><i class="fa-solid fa-bullhorn"></i></a></li>
+                    <li><a href="/add_admin" data-tooltip="Add Admin"><i class="fa-solid fa-user-plus"></i></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-avatar">
+                <!-- Avatar image removed -->
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 class="dynamic-title"><i class="fa-solid fa-hourglass-start"></i> Pending Approvals</h1>
+                <div class="header-actions">
+                    {% if admin_name %}
+                        <span class="admin-name">{{ admin_name }}</span>
+                    {% endif %}
+                    <a href="/logout" class="btn btn-danger">Logout</a>
+                </div>
+            </header>
+            <section class="card">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <div id="pending-users-container">
+                    {% if pending_users %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Chat ID</th>
+                                    <th>Name</th>
+                                    <th>Subscription Start</th>
+                                    <th>Subscription End</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-users-tbody">
+                                {% for user in pending_users %}
+                                <tr>
+                                    <td>{{ user[0] }}</td>
+                                    <td>{{ user[1] }}</td>
+                                    <td>{{ user[2] }}</td>
+                                    <td>{{ user[3] }}</td>
+                                    <td class="actions-buttons">
+                                        <a href="/approve_user/{{ user[0] }}" class="btn btn-success-light">Accept</a>
+                                        <a href="/decline_user/{{ user[0] }}" class="btn btn-danger-light">Decline</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p id="no-requests-message" class="text-center text-secondary" style="padding: 20px;">No pending approval requests at the moment.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+</body>
+</html> 
