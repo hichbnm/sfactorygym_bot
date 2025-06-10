@@ -1,200 +1,139 @@
-# 🏋️‍♂️ Salle de Sport Bot
+# S Factory Gym Bot 🤖
 
-A Telegram bot to manage gym (salle de sport) memberships. It allows users to register, select subscription durations (1, 3, or 12 months), and check their remaining subscription time. Admins can manage users, broadcast messages, and update subscription details.
+A Telegram bot and web dashboard for managing gym memberships and subscriptions. This system provides an automated way to handle member registrations, subscription management, and administrative tasks.
 
----
+## Features 🌟
 
-## 📦 Features
+### For Members
+- Easy registration process
+- Subscription management
+- Automatic expiration notifications
+- AI-powered assistant for queries
+- Subscription renewal requests
+- View personal subscription information
 
-### 👤 User Features
+### For Administrators
+- Web dashboard for member management
+- Member approval system
+- Subscription duration management
+- Broadcast messages to members
+- Admin user management
+- Member information editing
+- Pending approvals management
 
-- `/start` — Begin registration
-- ⏳ Choose subscription duration: 1, 3, or 12 months
-- 🔐 Wait for **admin approval** to access features
-- 📋 `/myinfo` — View your subscription details
-- 🤖 `/assistant` — Talk with the AI assistant
-- 🧠 `/assistant_history` — View your AI chat history
-- 🔄 `/renew` — Renew your subscription
-- ⚠️ Automatic notifications for expiring subscriptions
-- 🛑 Automatic deactivation of expired subscriptions
+## Tech Stack 💻
 
-### 🔧 Admin Features
+- **Backend**: Python
+- **Bot Framework**: python-telegram-bot
+- **Web Framework**: FastAPI
+- **Database**: SQLite
+- **Template Engine**: Jinja2
+- **Containerization**: Docker
+- **AI Integration**: OpenRouter API
 
-- `/add_admin <chat_id>` — Add a new admin
-- `/change_name <chat_id> <new_name>` — Change a user's name
-- `/change_duration <chat_id> <months>` — Modify a user's subscription
-- `/broadcast <message>` — Send a message to all users
-- `/users` — List all users
-- `/admins` — List all admins
-- ✅ Inline approval or rejection of subscription requests
+## Prerequisites 📋
 
-- 🌐 Web Dashboard Interface:
-  - User management
-  - Admin management
-  - Broadcast messages
-  - View pending approvals
-  - View broadcast statistics
-  - Secure admin login
+- Python 3.8+
+- Docker and Docker Compose (for containerized deployment)
+- Telegram Bot Token
+- OpenRouter API Key (for AI assistant feature)
 
-### 🤖 AI Assistant Features
+## Installation 🚀
 
-- Natural language conversation
-- Context-aware responses
-- Chat history tracking
-- `/stop` command to end conversation
-- Persistent chat history per user
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/telegram-salle.git
+cd telegram-salle
+```
 
----
-
-## 🚀 Getting Started
-
-### ⚖️ Prerequisites
-
-* Python 3.10+
-* Docker & Docker Compose
-* Telegram Bot Token
-* SQLite database (included)
-
-### ⚙️ Environment Setup
-
-Create a `.env` file at the root:
-
+2. Create a `.env` file with the following variables:
 ```env
 BOT_TOKEN=your_telegram_bot_token
-ADMIN_CHAT_ID=your_telegram_user_id
+ADMIN_CHAT_ID=your_admin_chat_id
 OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
----
-
-## 🐳 Docker Setup
-
-To run the bot with Docker:
-
-```bash
-docker-compose up --build -d
-```
-
-The web dashboard will be available at `http://localhost:5001`
-
----
-
-## 🧪 Development Mode
-
-Install dependencies:
-
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the bot:
+## Running the Application 🏃
 
+### Using Docker
+```bash
+docker-compose up -d
+```
+
+### Manual Setup
+ Start the bot:
 ```bash
 python bot.py
 ```
 
-The web dashboard will be available at `http://localhost:5001`
 
----
+## Usage 📱
 
-## 👥 User Flow
+### Bot Commands
 
-1. User starts bot via `/start`
-2. Bot asks for user's name
-3. User selects subscription period (1/3/12 months)
-4. Request is sent to admin
-5. Admin accepts or declines using inline buttons
-6. If accepted:
-   - User can access /myinfo, /assistant, and /assistant_history
-   - User is notified and has access to features
-7. Before expiration:
-   - User receives notification
-   - Can use /renew to extend subscription
-8. After expiration:
-   - Account is automatically deactivated
-   - User must renew to regain access
+#### User Commands
+- `/start` - Start and register your name
+- `/myinfo` - View subscription information
+- `/assistant` - Chat with AI assistant 🤖
+- `/assistant_history` - View AI chat history 🧠
+- `/renew` - Renew your subscription
 
----
+#### Admin Commands
+- `/broadcast` - Send message to all users
+- `/users` - View user list
+- `/change_name` - Modify user name
+- `/change_duration` - Modify subscription duration
+- `/add_admin` - Add admin by ID
+- `/remove_admin` - Remove admin by ID
+- `/list_admins` - View admin list
 
-## 📂 Project Structure
+### Web Dashboard
+Access the web dashboard at `http://localhost:8000` to:
+- Manage members
+- Handle pending approvals
+- Send broadcast messages
+- Edit member information
+- Manage admin users
+
+## Project Structure 📁
 
 ```
-.
-├── bot.py              # Main bot logic
-├── flask_api.py        # Web dashboard API
-├── database/           # Database operations
-├── handlers/           # Command handlers
-├── templates/          # Web dashboard templates
-├── static/            # Web dashboard assets
-├── media/             # Bot images/logos
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-└── README.md
+telegram-salle/
+├── bot.py              # Main bot application
+├── fastapi_app.py      # Web dashboard application
+├── requirements.txt    # Python dependencies
+├── Dockerfile         # Docker configuration
+├── docker-compose.yml # Docker Compose configuration
+├── database/          # Database related files
+├── handlers/          # Bot command handlers
+├── static/           # Static files for web dashboard
+├── templates/        # HTML templates
+└── media/           # Media files
 ```
 
----
+## Contributing 🤝
 
-## 🛡 Admin Command Reference
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-| Command            | Description                           |
-| ------------------ | ------------------------------------- |
-| `/add_admin`       | Add a new admin by chat ID            |
-| `/change_name`     | Update a user's name                  |
-| `/change_duration` | Modify a user's subscription duration |
-| `/broadcast`       | Send a message to all users           |
-| `/users`           | List all users                        |
-| `/list_admins`     | List all admins                       |
+## License 📄
 
----
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🌐 Web Dashboard Features
+## Support 💬
 
-- **Login System**
-  - Secure admin authentication
-  - Session management
-  - Logout functionality
+For support, please open an issue in the GitHub repository or contact the maintainers.
 
-- **Dashboard Overview**
-  - Total users count
-  - Pending approvals
-  - Broadcast statistics
-  - Admin list
+## Acknowledgments 🙏
 
-- **User Management**
-  - View all users
-  - Remove users
-  - View subscription status
-
-- **Admin Management**
-  - Add new admins
-  - Remove existing admins
-  - View admin list
-
-- **Broadcast System**
-  - Send messages to all users
-  - Track broadcast success
-  - View broadcast history
-
----
-
-## 🧐 Tech Stack
-
-* `python-telegram-bot`
-* Flask (Web Dashboard)
-* SQLite
-* Docker / Docker Compose
-* Python 3.10+
-* APScheduler (for automated tasks)
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome! Feel free to open issues for improvements or bugs.
-
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+- python-telegram-bot team
+- FastAPI team
+- OpenRouter for AI capabilities
