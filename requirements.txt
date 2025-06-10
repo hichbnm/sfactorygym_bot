@@ -3,4 +3,8 @@ python-dotenv
 watchdog
 python-telegram-bot[job-queue]
 requests
-flask
+fastapi
+uvicorn
+jinja2
+python-multipart
+itsdangerous

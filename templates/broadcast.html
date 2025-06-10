@@ -45,32 +45,68 @@
             </header>
             <section class="card">
                 <h2>Send Broadcast Message</h2>
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
+                <div class="content">
+                    <div class="header">
+                        <h1>Broadcast Message</h1>
+                    </div>
+                    {% if flash_messages %}
                         <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="flash-message flash-{{ category }}">
-                                    {{ message }}
+                            {% for message in flash_messages %}
+                                <div class="flash-message">
+                                    {{ message.message }}
                                 </div>
                             {% endfor %}
                         </div>
                     {% endif %}
-                {% endwith %}
-                <form action="/broadcast" method="POST" class="broadcast-form">
-                    <div class="form-group">
-                        <textarea name="message" placeholder="Enter your broadcast message here..." required></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Send Broadcast
-                        </button>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                    <form method="POST" action="/broadcast" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Recipients:</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="recipient_type" value="all" checked onchange="toggleUserSelection()">
+                                    All Users
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="recipient_type" value="selected" onchange="toggleUserSelection()">
+                                    Selected Users
+                                </label>
+                            </div>
+                            <div id="userSelection" style="display: none; margin-top: 10px;">
+                                <select name="selected_users" multiple class="form-control" style="height: 150px;">
+                                    {% for user in users %}
+                                        <option value="{{ user[0] }}">{{ user[1] }} ({{ user[0] }})</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text">Hold Ctrl/Cmd to select multiple users</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message:</label>
+                            <textarea name="message" id="message" placeholder="Enter your broadcast message here..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="photo">Photo (optional):</label>
+                            <input type="file" id="photo" name="photo" accept="image/*">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Broadcast
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </section>
         </main>
     </div>
+    <script>
+        function toggleUserSelection() {
+            const userSelection = document.getElementById('userSelection');
+            const selectedRadio = document.querySelector('input[name="recipient_type"]:checked');
+            userSelection.style.display = selectedRadio.value === 'selected' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html> 

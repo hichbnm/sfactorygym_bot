@@ -57,6 +57,11 @@ body {
     flex-direction: column;
     box-shadow: var(--shadow-md);
     transition: width var(--transition-speed) ease;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
 }
 
 .sidebar-logo {
@@ -161,7 +166,7 @@ body {
 .main-content {
     flex-grow: 1;
     padding: 30px;
-    margin-left: 80px;
+    margin-left: 120px;
     transition: margin-left var(--transition-speed) ease;
 }
 

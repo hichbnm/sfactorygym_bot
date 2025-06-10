@@ -26,13 +26,14 @@ from handlers.admin_edit import (
 )
 from handlers import start, remove, user, admins, broadcast, ai_assistant
 from database.database import add_admin, is_admin, get_all_admins
-from flask_api import run_flask  # Import the Flask API
+from fastapi_app import app  # Import the FastAPI app
 
 from handlers.user import myinfo, notify_expiring_users, renew, renew_duration
 from handlers.start import disable_expired_users
 from apscheduler.schedulers.background import BackgroundScheduler
 from handlers.admin_edit import handle_renewal_approval
 from telegram import BotCommand
+import uvicorn
 
 
 # Load environment variables from .env file
@@ -44,9 +45,9 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 USER_COMMANDS = [
     BotCommand("start", "Commencer et enregistrer votre nom"),
-    BotCommand("myinfo", "Voir vos informations d’abonnement"),
+    BotCommand("myinfo", "Voir vos informations d'abonnement"),
     BotCommand("assistant", "Parler avec l'assistant IA 🤖"),
-    BotCommand("assistant_history", "Voir l’historique de vos discussions IA 🧠"),
+    BotCommand("assistant_history", "Voir l'historique de vos discussions IA 🧠"),
     BotCommand("renew", "Renouveler votre abonnement"),
 ]
 
@@ -54,8 +55,8 @@ ADMIN_COMMANDS = [
     BotCommand("start", "Commencer le bot "),
     BotCommand("broadcast", "Envoyer un message à tous les utilisateurs"),
     BotCommand("users", "Voir la liste des utilisateurs"),
-    BotCommand("change_name", "Modifier le nom d’un utilisateur"),
-    BotCommand("change_duration", "Modifier la durée d’abonnement d’un utilisateur"),
+    BotCommand("change_name", "Modifier le nom d'un utilisateur"),
+    BotCommand("change_duration", "Modifier la durée d'abonnement d'un utilisateur"),
     BotCommand("add_admin", "Ajouter un admin par ID"),
     BotCommand("remove_admin", "Retirer un admin par ID"),
     BotCommand("list_admins", "Voir la liste des admins"),
@@ -73,6 +74,9 @@ async def set_commands(app):
         except BadRequest as e:
             print(f"Failed to set commands for admin {admin_id}: {e}")
             continue  # Skip invalid admin IDs and continue setting commands for others
+
+def run_fastapi():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
@@ -163,9 +167,9 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_assistant.assistant_message))
     app.add_handler(CommandHandler("stop", ai_assistant.stop_assistant))
 
-    # --- Start Flask API for broadcast ---
-    Thread(target=run_flask, daemon=True).start()
-    # --- End Flask API for broadcast ---
+    # --- Start FastAPI for broadcast ---
+    Thread(target=run_fastapi, daemon=True).start()
+    # --- End FastAPI for broadcast ---
 
     # Start polling updates from Telegram
     app.run_polling()

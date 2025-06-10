@@ -45,35 +45,35 @@
             </header>
             <section class="card">
                 <h2>Add New Admin</h2>
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
+                <div class="content">
+                    {% if flash_messages %}
                         <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="flash-message flash-{{ category }}">
-                                    {{ message }}
+                            {% for message in flash_messages %}
+                                <div class="flash-message">
+                                    {{ message.message }}
                                 </div>
                             {% endfor %}
                         </div>
                     {% endif %}
-                {% endwith %}
-                <form action="/add_admin" method="POST" class="admin-form">
-                    <div class="form-group">
-                        <label for="chat_id">Chat ID:</label>
-                        <input type="text" id="chat_id" name="chat_id" placeholder="Enter Admin Chat ID" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" id="name" name="name" placeholder="Enter Admin Name" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Add Admin
-                        </button>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                    <form action="/add_admin" method="POST" class="admin-form">
+                        <div class="form-group">
+                            <label for="chat_id">Chat ID:</label>
+                            <input type="text" id="chat_id" name="chat_id" placeholder="Enter Admin Chat ID" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" id="name" name="name" placeholder="Enter Admin Name" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Add Admin
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </section>
         </main>
     </div>

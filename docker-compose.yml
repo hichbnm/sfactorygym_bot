@@ -5,11 +5,10 @@ services:
     build: .
     container_name: telegram_bot
     ports:
-      - "5001:5001"
+      - "8000:8000"
     env_file:
       - .env
     volumes:
-      - ./app       # Mount source code
       - ./bot.db:/app/bot.db  # SQLite DB persistence
     restart: unless-stopped
     logging:

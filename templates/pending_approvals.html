@@ -44,48 +44,50 @@
                 </div>
             </header>
             <section class="card">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
+                <div class="content">
+                    <div class="header">
+                        <h1>Pending Approvals</h1>
+                    </div>
+                    {% if flash_messages %}
                         <div class="flash-messages">
-                            {% for category, message in messages %}
-                                <div class="flash-message flash-{{ category }}">
-                                    {{ message }}
+                            {% for message in flash_messages %}
+                                <div class="flash-message">
+                                    {{ message.message }}
                                 </div>
                             {% endfor %}
                         </div>
                     {% endif %}
-                {% endwith %}
-
-                <div id="pending-users-container">
-                    {% if pending_users %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Chat ID</th>
-                                    <th>Name</th>
-                                    <th>Subscription Start</th>
-                                    <th>Subscription End</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pending-users-tbody">
-                                {% for user in pending_users %}
-                                <tr>
-                                    <td>{{ user[0] }}</td>
-                                    <td>{{ user[1] }}</td>
-                                    <td>{{ user[2] }}</td>
-                                    <td>{{ user[3] }}</td>
-                                    <td class="actions-buttons">
-                                        <a href="/approve_user/{{ user[0] }}" class="btn btn-success-light">Accept</a>
-                                        <a href="/decline_user/{{ user[0] }}" class="btn btn-danger-light">Decline</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p id="no-requests-message" class="text-center text-secondary" style="padding: 20px;">No pending approval requests at the moment.</p>
-                    {% endif %}
+                    <div id="pending-users-container">
+                        {% if pending_users %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Chat ID</th>
+                                        <th>Name</th>
+                                        <th>Subscription Start</th>
+                                        <th>Subscription End</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-users-tbody">
+                                    {% for user in pending_users %}
+                                    <tr>
+                                        <td>{{ user[0] }}</td>
+                                        <td>{{ user[1] }}</td>
+                                        <td>{{ user[2] }}</td>
+                                        <td>{{ user[3] }}</td>
+                                        <td class="actions-buttons">
+                                            <a href="/approve_user/{{ user[0] }}" class="btn btn-success-light">Accept</a>
+                                            <a href="/decline_user/{{ user[0] }}" class="btn btn-danger-light">Decline</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p id="no-requests-message" class="text-center text-secondary" style="padding: 20px;">No pending approval requests at the moment.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </section>
         </main>
